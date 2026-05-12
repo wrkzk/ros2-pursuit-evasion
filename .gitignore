@@ -7,6 +7,6 @@ log/
 __pycache__/
 *.pyc
 
-#IDEs
+# IDE files
 .vscode
 .idea
