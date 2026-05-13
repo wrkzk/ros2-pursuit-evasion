@@ -10,14 +10,22 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
 
+    # Packages we are using
     pkg_ros_gz = get_package_share_directory('ros_gz_sim')
     pkg_dd_robot = get_package_share_directory('dd_robot')
+
+    # Define the robots that we want to spawn in
+    robots = [
+        { 'name': 'pursuer', 'x': '0.0', 'y': '0.0' },
+        { 'name': 'evader',  'x': '5.0', 'y': '0.0' }
+    ]
 
     # Initialize custom robot based on urdf file
     urdf_file = os.path.join(pkg_dd_robot, 'urdf', 'dd_robot.urdf')
     with open(urdf_file, 'r') as f:
         robot_description = f.read()
 
+    # Define the gazebo launch command
     gazebo = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(
@@ -25,47 +33,59 @@ def generate_launch_description():
             )
         ),
         launch_arguments = {
-            'gz_args': [' -r'],
+            'gz_args': ['-r empty.sdf'],
             'on_exit_shutdown': 'True'
         }.items()
     )
 
-    robot_state_publisher = Node(
-        package = 'robot_state_publisher',
-        executable = 'robot_state_publisher',
-        namespace = 'dd_robot',
-        name = 'robot_state_publisher',
-        output = 'screen',
-        parameters = [{
-            'robot_description': robot_description,
-            'use_sim_time': True,
-            'frame_prefix': 'dd_robot/'
-        }],
-        remappings = [
-            ('/tf', 'tf'),
-            ('/tf_static', 'tf_static')
-        ]
-    )
+    launch_items = [ gazebo ]
+    for robot in robots:
 
-    spawn = Node(
-        package = 'ros_gz_sim',
-        executable = 'create',
-        name = 'spawn_dd_robot',
-        arguments = [
-            '-name', 'dd_robot',
-            '-topic', '/dd_robot/robot_description',
-            '-x', '0',
-            '-y', '0',
-            '-z', '0',
-            '-Y', '0'
-        ],
-        output = 'screen'
-    )
+        robot_name = robot['name']
+
+        robot_state_publisher = Node(
+            package = 'robot_state_publisher',
+            executable = 'robot_state_publisher',
+            namespace = robot_name,
+            name = 'robot_state_publisher',
+            output = 'screen',
+            parameters = [{
+                'robot_description': robot_description,
+                'frame_prefix': f'{robot_name}/'
+            }]
+        )
+
+        bridge = Node(
+            package = 'ros_gz_bridge',
+            executable = 'parameter_bridge',
+            namespace = robot_name,
+            arguments = [
+                f'/model/{robot_name}/cmd_vel@geometry_msgs/msg/Twist]gz.msgs.Twist'
+            ],
+            remappings = [
+                (f'/model/{robot_name}/cmd_vel', f'/{robot_name}/cmd_vel')
+            ]
+        )
+
+        spawn = Node(
+            package = 'ros_gz_sim',
+            executable = 'create',
+            name = 'spawn_dd_robot',
+            arguments = [
+                '-name', robot_name,
+                '-topic', f'/{robot_name}/robot_description',
+                '-x', robot['x'],
+                '-y', robot['y'],
+                '-z', '0.5',
+                '-Y', '0'
+            ],
+            output = 'screen'
+        )
+
+        launch_items.append(robot_state_publisher)
+        launch_items.append(bridge)
+        launch_items.append(spawn) 
 
     return LaunchDescription(
-        [
-            gazebo,
-            robot_state_publisher,
-            spawn
-        ]
+        launch_items
     )
