@@ -1,5 +1,7 @@
 <?xml version="1.0"?>
-<robot name="dd_robot">
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="dd_robot">
+	
+	<xacro:arg name="robot_name" default="dd_robot"/>
 
 	<!-- Base Link (Robot Body) -->
 	<link name="base_link">
@@ -123,11 +125,12 @@
 			<wheel_radius>0.2</wheel_radius>
 			<max_linear_acceleration>1.0</max_linear_acceleration>
 			<odom_publish_frequency>50</odom_publish_frequency>
-			<topic>cmd_vel</topic>
-			<odom_topic>odom</odom_topic>
-			<tf_topic>tf</tf_topic>
-			<frame_id>odom</frame_id>
-			<child_frame_id>base_link</child_frame_id>
+			
+			<topic>/model/$(arg robot_name)/cmd_vel</topic>
+			<odom_topic>/model/$(arg robot_name)/odom</odom_topic>
+			<tf_topic>/model/$(arg robot_name)/tf</tf_topic>
+			<frame_id>$(arg robot_name)/odom</frame_id>
+			<child_frame_id>$(arg robot_name)/base_link</child_frame_id>
 		</plugin>
 		<plugin filename="gz-sim-joint-state-publisher-system" name="gz::sim::systems::JointStatePublisher">
 			<joint_name>joint_left_wheel</joint_name>
