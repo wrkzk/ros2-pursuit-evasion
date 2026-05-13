@@ -4,6 +4,7 @@ from ament_index_python import get_package_share_directory
 
 from launch import LaunchDescription
 from launch.actions import IncludeLaunchDescription
+from launch.substitutions import Command
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
 
@@ -21,9 +22,7 @@ def generate_launch_description():
     ]
 
     # Initialize custom robot based on urdf file
-    urdf_file = os.path.join(pkg_dd_robot, 'urdf', 'dd_robot.urdf')
-    with open(urdf_file, 'r') as f:
-        robot_description = f.read()
+    urdf_file = os.path.join(pkg_dd_robot, 'urdf', 'dd_robot.urdf.xacro')
 
     # Define the gazebo launch command
     gazebo = IncludeLaunchDescription(
@@ -42,6 +41,12 @@ def generate_launch_description():
     for robot in robots:
 
         robot_name = robot['name']
+
+        robot_description = Command([
+            'xacro ',
+            urdf_file,
+            ' robot_name:=', robot_name
+        ])
 
         robot_state_publisher = Node(
             package = 'robot_state_publisher',
