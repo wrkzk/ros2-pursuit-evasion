@@ -37,7 +37,21 @@ def generate_launch_description():
         }.items()
     )
 
-    launch_items = [ gazebo ]
+    manager = Node(
+        package = 'pursuit_evasion',
+        executable = 'manager',
+        name = 'manager',
+        output = 'screen',
+        parameters = [{
+            'active_robots': [robot['name'] for robot in robots]
+        }]
+    )
+
+    launch_items = [
+        gazebo,
+        manager
+    ]
+    
     for robot in robots:
 
         robot_name = robot['name']
@@ -65,10 +79,12 @@ def generate_launch_description():
             executable = 'parameter_bridge',
             namespace = robot_name,
             arguments = [
-                f'/model/{robot_name}/cmd_vel@geometry_msgs/msg/Twist]gz.msgs.Twist'
+                f'/model/{robot_name}/cmd_vel@geometry_msgs/msg/Twist]gz.msgs.Twist',
+                f'/model/{robot_name}/odometry@nav_msgs/msg/Odometry[gz.msgs.Odometry'
             ],
             remappings = [
-                (f'/model/{robot_name}/cmd_vel', f'/{robot_name}/cmd_vel')
+                (f'/model/{robot_name}/cmd_vel', f'/{robot_name}/cmd_vel'),
+                (f'/model/{robot_name}/odometry', f'/{robot_name}/odom')
             ]
         )
 
