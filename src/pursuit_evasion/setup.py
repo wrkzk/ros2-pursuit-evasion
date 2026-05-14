@@ -27,6 +27,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
+            'manager = pursuit_evasion.manager:main'
         ],
     },
 )
