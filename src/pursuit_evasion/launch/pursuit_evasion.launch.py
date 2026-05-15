@@ -32,7 +32,7 @@ def generate_launch_description():
             )
         ),
         launch_arguments = {
-            'gz_args': ['-r empty.sdf'],
+            'gz_args': ['-r ', os.path.join(pkg_dd_robot, 'worlds', 'pursuit_world.sdf')],
             'on_exit_shutdown': 'True'
         }.items()
     )
@@ -43,7 +43,7 @@ def generate_launch_description():
         name = 'manager',
         output = 'screen',
         parameters = [{
-            'active_robots': [robot['name'] for robot in robots]
+            'active_robots': [r['name'] for r in robots]
         }]
     )
 
@@ -80,11 +80,11 @@ def generate_launch_description():
             namespace = robot_name,
             arguments = [
                 f'/model/{robot_name}/cmd_vel@geometry_msgs/msg/Twist]gz.msgs.Twist',
-                f'/model/{robot_name}/odometry@nav_msgs/msg/Odometry[gz.msgs.Odometry'
+                f'/model/{robot_name}/pose@geometry_msgs/msg/Pose[gz.msgs.Pose',
             ],
             remappings = [
                 (f'/model/{robot_name}/cmd_vel', f'/{robot_name}/cmd_vel'),
-                (f'/model/{robot_name}/odometry', f'/{robot_name}/odom')
+                (f'/model/{robot_name}/pose', f'/{robot_name}/pose'),
             ]
         )
 
