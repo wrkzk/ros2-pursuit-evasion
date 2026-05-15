@@ -103,6 +103,17 @@ def generate_launch_description():
             output = 'screen'
         )
 
+        if robot_name.split('_')[0] == 'pursuer':
+            controller = Node(
+                package = 'pursuit_evasion',
+                executable = 'pursuit_controller',
+                name = f'{robot_name}_controller',
+                parameters = [{
+                    'robot': f'{robot_name}'
+                }]
+            )
+            launch_items.append(controller)
+
         launch_items.append(robot_state_publisher)
         launch_items.append(bridge)
         launch_items.append(spawn) 
