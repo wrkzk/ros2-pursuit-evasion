@@ -1,5 +1,6 @@
 import rclpy
 import json
+import math
 
 from rclpy.node import Node
 from std_msgs.msg import String
@@ -26,13 +27,24 @@ class PursuitController(Node):
         )
             
     def control_loop(self, msg):
-        # data = json.load(msg)
-        
-        cmd_vel = Twist()
-        cmd_vel.linear.x = 0.5
-        cmd_vel.angular.z = 0.5
+        data = json.loads(msg.data)
 
-        self.publisher_.publish(cmd_vel)
+        # self.get_logger().info(msg.data)
+
+        try:
+            dx = data["evader"]["x"] - data["pursuer"]["x"]
+            dy = data["evader"]["y"] - data["pursuer"]["y"]
+
+            theta = math.atan2(dy, dx)
+
+            cmd_vel = Twist()
+            cmd_vel.linear.x = 0.5
+            cmd_vel.angular.z = theta - data["pursuer"]["yaw"]
+
+            self.publisher_.publish(cmd_vel)
+
+        except KeyError:
+            pass
         
 def main(args=None):
     rclpy.init(args=args)

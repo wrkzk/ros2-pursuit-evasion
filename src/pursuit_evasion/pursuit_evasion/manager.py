@@ -1,12 +1,12 @@
 import rclpy
 import json
+import math
 
 from rclpy.node import Node
 from std_msgs.msg import String
 from geometry_msgs.msg import Pose
 
 from functools import partial
-
 
 class Manager(Node):
 
@@ -46,6 +46,15 @@ class Manager(Node):
     def listener_callback(self, msg, extra_arg):
         self.states[extra_arg]['x'] = round(msg.position.x, 4)
         self.states[extra_arg]['y'] = round(msg.position.y, 4)
+
+        x = msg.orientation.x
+        y = msg.orientation.y
+        z = msg.orientation.z
+        w = msg.orientation.w
+
+        siny_cosp = 2 * (w * z + x * y)
+        cosy_cosp = 1 - 2 * (y**2 + z**2)
+        self.states[extra_arg]['yaw'] = math.atan2(siny_cosp, cosy_cosp)
         
 def main(args=None):
     rclpy.init(args=args)
