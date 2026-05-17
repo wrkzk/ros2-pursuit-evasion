@@ -27,7 +27,7 @@ class Manager(Node):
         self.odom_subs = []
         for robot in self.active_robots:
 
-            self.states[robot] = {}
+            self.states[robot] = { 'x': 0.0, 'y': 0.0, 'yaw': 0.0 }
             
             self.odom_subs.append(
                 self.create_subscription(
@@ -44,9 +44,12 @@ class Manager(Node):
         self.publisher_.publish(msg)
 
     def listener_callback(self, msg, extra_arg):
+
+        # Update the current x and y position for the current robot
         self.states[extra_arg]['x'] = round(msg.position.x, 4)
         self.states[extra_arg]['y'] = round(msg.position.y, 4)
 
+        # Use the incoming quaternion data to calculate the heading angle inthe xy plane
         x = msg.orientation.x
         y = msg.orientation.y
         z = msg.orientation.z
@@ -54,7 +57,7 @@ class Manager(Node):
 
         siny_cosp = 2 * (w * z + x * y)
         cosy_cosp = 1 - 2 * (y**2 + z**2)
-        self.states[extra_arg]['yaw'] = math.atan2(siny_cosp, cosy_cosp)
+        self.states[extra_arg]['yaw'] = round(math.atan2(siny_cosp, cosy_cosp), 4)
         
 def main(args=None):
     rclpy.init(args=args)
