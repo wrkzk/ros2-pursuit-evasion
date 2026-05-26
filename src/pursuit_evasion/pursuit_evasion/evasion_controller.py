@@ -6,13 +6,13 @@ from rclpy.node import Node
 from std_msgs.msg import String
 from geometry_msgs.msg import Twist
 
-class PursuitController(Node):
+class EvasionController(Node):
 
     def __init__(self):
-        super().__init__('pursuit_controller')
+        super().__init__('evasion_controller')
 
         # Argument for which robot this controller controls
-        self.declare_parameter('robot', 'pursuer')
+        self.declare_parameter('robot', 'evader')
         self.robot = self.get_parameter('robot').value
 
         # Publisher that sends velocity commands to the robot's cmd_vel topic
@@ -29,34 +29,24 @@ class PursuitController(Node):
     def control_loop(self, msg):
         data = json.loads(msg.data)
 
-        # Tuning parameters
-        k_att = 1.0
-        radius = 1.5
-
-        # Calculate attractive forces
-        attractive_x = k_att * (data["evader"]["x"] - data[self.robot]["x"])
-        attractive_y = k_att * (data["evader"]["y"] - data[self.robot]["y"])
-
-        # Calculate repulsive forces from team member robots
-        total_repulse_x = 0.0
-        total_repulse_y = 0.0
+        # Calculate repulsive forces from pursuing robots
+        F_x = 0.0
+        F_y = 0.0
         
-        #for robot in data.keys():
-        #    if robot == 'evader' or robot == self.robot:
-        #        continue
+        for robot in data.keys():
+            if robot == self.robot:
+                continue
 
-        #    teammate_dx = data[robot]['x'] - data[self.robot]['x']
-        #    teammate_dy = data[robot]['y'] - data[self.robot]['y']
-        #    distance = math.sqrt(teammate_dx ** 2 + teammate_dy ** 2)
+            pursuer_dx = data[robot]['x'] - data[self.robot]['x']
+            pursuer_dy = data[robot]['y'] - data[self.robot]['y']
+            distance = math.sqrt((pursuer_dx ** 2) + (pursuer_dy ** 2))
 
-        #    if distance > 0 and distance <= radius:
-        #        magnitude = 100.0 * (1.0 / distance - 1.0 / radius) * (1.0 / (distance**2))
-        #        total_repulse_x -= magnitude * (teammate_dx / distance)
-        #        total_repulse_y -= magnitude * (teammate_dy / distance)
+            if distance > 0:
+                magnitude = 2.0 * (1.0 / distance)
+                F_x -= magnitude * (pursuer_dx / distance)
+                F_y -= magnitude * (pursuer_dy / distance)
 
-        # Total forces
-        F_x = attractive_x + total_repulse_x
-        F_y = attractive_y + total_repulse_y
+        self.get_logger().info(f'F_x: {F_x}, F_y: {F_y}')
 
         F_magnitude = math.sqrt(F_x ** 2 + F_y ** 2)
         desired_heading = math.atan2(F_y, F_x)
@@ -71,7 +61,7 @@ class PursuitController(Node):
         kw = 2.0
         w = kw * heading_error
 
-        kv = 0.5
+        kv = 5.0
         v = kv * F_magnitude
 
         cmd_vel = Twist()
@@ -82,9 +72,9 @@ class PursuitController(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-    pursuit_controller = PursuitController()
-    rclpy.spin(pursuit_controller)
-    pursuit_controller.destroy_node()
+    evasion_controller = EvasionController()
+    rclpy.spin(evasion_controller)
+    evasion_controller.destroy_node()
     rclpy.shutdown()
 
 if __name__ == '__main__':
