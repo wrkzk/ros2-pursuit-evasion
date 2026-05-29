@@ -17,7 +17,6 @@ def generate_launch_description():
 
     # Define the robots that we want to spawn in
     robots = [
-        { 'name': 'pursuer_1', 'x': '0.0', 'y': '0.0' },
         { 'name': 'pursuer_2', 'x': '5.0', 'y': '5.0' },
         { 'name': 'pursuer_3', 'x': '5.0', 'y': '-5.0' },
         { 'name': 'evader_1',  'x': '5.0', 'y': '0.0' }
@@ -111,6 +110,20 @@ def generate_launch_description():
                 executable = 'pursuit_controller',
                 namespace = robot_name,
                 name = f'{robot_name}_controller',
+                output = 'screen',
+                parameters = [{
+                    'robot': f'{robot_name}'
+                }]
+            )
+            launch_items.append(controller)
+
+        elif robot_name == 'evader':
+            controller = Node(
+                package = 'pursuit_evasion',
+                executable = 'evasion_controller',
+                namespace = robot_name,
+                name = f'{robot_name}_controller',
+                output = 'screen',
                 parameters = [{
                     'robot': f'{robot_name}'
                 }]

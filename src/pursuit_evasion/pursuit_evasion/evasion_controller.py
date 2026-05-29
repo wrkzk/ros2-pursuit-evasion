@@ -29,26 +29,27 @@ class EvasionController(Node):
     def control_loop(self, msg):
         data = json.loads(msg.data)
 
-        # Calculate repulsive forces from team member robots
-        total_repulse_x = 0.0
-        total_repulse_y = 0.0
+        # Calculate repulsive forces from pursuing robots
+        F_x = 0.0
+        F_y = 0.0
         
         for robot in data.keys():
-
-            if robot == 'evader_1' or robot == self.robot:
+            if robot == self.robot:
                 continue
 
-            teammate_dx = data[robot]['x'] - data[self.robot]['x']
-            teammate_dy = data[robot]['y'] - data[self.robot]['y']
-            distance = math.sqrt(teammate_dx ** 2 + teammate_dy ** 2)
+            pursuer_dx = data[robot]['x'] - data[self.robot]['x']
+            pursuer_dy = data[robot]['y'] - data[self.robot]['y']
+            distance = math.sqrt((pursuer_dx ** 2) + (pursuer_dy ** 2))
 
             if distance > 0:
-                magnitude = 100.0 * (1.0 / distance) * (1.0 / (distance**2))
-                total_repulse_x -= magnitude * (teammate_dx / distance)
-                total_repulse_y -= magnitude * (teammate_dy / distance)
+                magnitude = 2.0 * (1.0 / distance)
+                F_x -= magnitude * (pursuer_dx / distance)
+                F_y -= magnitude * (pursuer_dy / distance)
 
-        F_magnitude = math.sqrt(total_repulse_x ** 2 + total_repulse_y ** 2)
-        desired_heading = math.atan2(total_repulse_y, total_repulse_x)
+        self.get_logger().info(f'F_x: {F_x}, F_y: {F_y}')
+
+        F_magnitude = math.sqrt(F_x ** 2 + F_y ** 2)
+        desired_heading = math.atan2(F_y, F_x)
 
         heading_error = desired_heading - data[self.robot]['yaw']
         heading_error = (heading_error + math.pi) % (2 * math.pi) - math.pi
@@ -57,10 +58,10 @@ class EvasionController(Node):
         max_turn_vel = 1.0
         max_linear_vel = 1.0
         
-        kw = 4.0
+        kw = 2.0
         w = kw * heading_error
 
-        kv = 0.5
+        kv = 5.0
         v = kv * F_magnitude
 
         cmd_vel = Twist()

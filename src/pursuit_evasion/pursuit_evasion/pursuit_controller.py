@@ -46,14 +46,14 @@ class PursuitController(Node):
             if robot == 'evader_1' or robot == self.robot:
                 continue
 
-            teammate_dx = data[robot]['x'] - data[self.robot]['x']
-            teammate_dy = data[robot]['y'] - data[self.robot]['y']
-            distance = math.sqrt(teammate_dx ** 2 + teammate_dy ** 2)
+        #    teammate_dx = data[robot]['x'] - data[self.robot]['x']
+        #    teammate_dy = data[robot]['y'] - data[self.robot]['y']
+        #    distance = math.sqrt(teammate_dx ** 2 + teammate_dy ** 2)
 
-            if distance > 0 and distance <= radius:
-                magnitude = 100.0 * (1.0 / distance - 1.0 / radius) * (1.0 / (distance**2))
-                total_repulse_x -= magnitude * (teammate_dx / distance)
-                total_repulse_y -= magnitude * (teammate_dy / distance)
+        #    if distance > 0 and distance <= radius:
+        #        magnitude = 100.0 * (1.0 / distance - 1.0 / radius) * (1.0 / (distance**2))
+        #        total_repulse_x -= magnitude * (teammate_dx / distance)
+        #        total_repulse_y -= magnitude * (teammate_dy / distance)
 
         # Total forces
         F_x = attractive_x + total_repulse_x
