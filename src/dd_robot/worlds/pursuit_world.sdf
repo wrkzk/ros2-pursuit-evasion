@@ -60,7 +60,7 @@ gz service -s /world/empty/create \
 
 -->
 <sdf version="1.6">
-  <world name="empty">
+  <world name="pursuit_world">
     <physics name="1ms" type="ignored">
       <max_step_size>0.001</max_step_size>
       <real_time_factor>1.0</real_time_factor>
@@ -123,5 +123,87 @@ gz service -s /world/empty/create \
       </link>
     </model>
 
+    <model name="bounding_walls">
+      <static>true</static>
+
+      <!-- North Wall -->
+      <link name="north_wall">
+        <pose>0 5 1 0 0 0</pose>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>10 0.1 2</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>10 0.1 2</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+
+    
+      <!-- South Wall -->
+      <link name="south_wall">
+        <pose>0 -5 1 0 0 0</pose>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>10 0.1 2</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>10 0.1 2</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+
+      
+      <!-- East Wall -->
+      <link name="east_wall">
+        <pose>5 0 1 0 0 1.5707</pose>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>10 0.1 2</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>10 0.1 2</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+
+      
+      <!-- West Wall -->
+      <link name="west_wall">
+        <pose>-5 0 1 0 0 1.5707</pose>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>10 0.1 2</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>10 0.1 2</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+    </model>
   </world>
 </sdf>

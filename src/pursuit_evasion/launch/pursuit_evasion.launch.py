@@ -84,10 +84,12 @@ def generate_launch_description():
             arguments = [
                 f'/model/{robot_name}/cmd_vel@geometry_msgs/msg/Twist]gz.msgs.Twist',
                 f'/model/{robot_name}/pose@geometry_msgs/msg/Pose[gz.msgs.Pose',
+                f'/model/{robot_name}/scan@sensor_msgs/msg/LaserScan@gz.msgs.LaserScan'
             ],
             remappings = [
                 (f'/model/{robot_name}/cmd_vel', f'/{robot_name}/cmd_vel'),
                 (f'/model/{robot_name}/pose', f'/{robot_name}/pose'),
+                (f'/model/{robot_name}/scan', f'/{robot_name}/scan')
             ]
         )
 
