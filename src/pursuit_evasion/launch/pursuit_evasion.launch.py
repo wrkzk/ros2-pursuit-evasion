@@ -17,8 +17,8 @@ def generate_launch_description():
 
     # Define the robots that we want to spawn in
     robots = [
-        { 'name': 'pursuer_2', 'x': '3.0', 'y': '3.0' },
-        { 'name': 'evader',  'x': '3.0', 'y': '0.0' }
+        { 'name': 'pursuer_1', 'x': '3.0', 'y': '3.0' },
+        { 'name': 'evader_1',  'x': '3.0', 'y': '0.0' }
     ]
 
     # Initialize custom robot based on urdf file
