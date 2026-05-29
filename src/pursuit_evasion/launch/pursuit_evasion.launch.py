@@ -19,7 +19,8 @@ def generate_launch_description():
     robots = [
         { 'name': 'pursuer_1', 'x': '0.0', 'y': '0.0' },
         { 'name': 'pursuer_2', 'x': '5.0', 'y': '5.0' },
-        { 'name': 'evader',  'x': '5.0', 'y': '0.0' }
+        { 'name': 'pursuer_3', 'x': '5.0', 'y': '-5.0' },
+        { 'name': 'evader_1',  'x': '5.0', 'y': '0.0' }
     ]
 
     # Initialize custom robot based on urdf file
@@ -116,9 +117,23 @@ def generate_launch_description():
             )
             launch_items.append(controller)
 
+        if robot_name.split('_')[0] == 'evader':
+            controller = Node(
+                package = 'pursuit_evasion',
+                executable = 'evasion_controller',
+                namespace = robot_name,
+                name = f'{robot_name}_controller',
+                parameters = [{
+                    'robot': f'{robot_name}'
+                }]
+            )
+            launch_items.append(controller)
+
+
         launch_items.append(robot_state_publisher)
         launch_items.append(bridge)
         launch_items.append(spawn) 
+
 
     return LaunchDescription(
         launch_items
