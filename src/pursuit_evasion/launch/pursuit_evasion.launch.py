@@ -17,8 +17,10 @@ def generate_launch_description():
 
     # Define the robots that we want to spawn in
     robots = [
-        { 'name': 'pursuer_2', 'x': '5.0', 'y': '5.0' },
-        { 'name': 'pursuer_3', 'x': '5.0', 'y': '-5.0' },
+        { 'name': 'pursuer_2', 'x': '3.5', 'y': '2.5', 'lookahead' : 5.0},
+        { 'name': 'pursuer_3', 'x': '3.5', 'y': '-2.5', 'lookahead' : 5.0},
+        { 'name': 'pursuer_4', 'x': '6.5', 'y': '2.5', 'lookahead' : 5.0},
+        { 'name': 'pursuer_5', 'x': '6.5', 'y': '-2.5', 'lookahead' : 5.0},
         { 'name': 'evader_1',  'x': '5.0', 'y': '0.0' }
     ]
 
@@ -112,7 +114,8 @@ def generate_launch_description():
                 name = f'{robot_name}_controller',
                 output = 'screen',
                 parameters = [{
-                    'robot': f'{robot_name}'
+                    'robot': f'{robot_name}',
+                    'lookahead' : robot["lookahead"]
                 }]
             )
             launch_items.append(controller)

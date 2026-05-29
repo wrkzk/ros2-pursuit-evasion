@@ -5,6 +5,7 @@ import math
 from rclpy.node import Node
 from std_msgs.msg import String
 from geometry_msgs.msg import Twist
+from visualization_msgs.msg import Marker
 
 class PursuitController(Node):
 
@@ -13,7 +14,11 @@ class PursuitController(Node):
 
         # Argument for which robot this controller controls
         self.declare_parameter('robot', 'pursuer')
+        self.declare_parameter('lookahead', 3.0)
         self.robot = self.get_parameter('robot').value
+        self.lookahead_d = self.get_parameter('lookahead').value
+
+        self.marker_pub = self.create_publisher(Marker, 'debug_marker', 10)
 
         # Publisher that sends velocity commands to the robot's cmd_vel topic
         self.publisher_ = self.create_publisher(Twist, f'/{self.robot}/cmd_vel', 10)
@@ -35,25 +40,29 @@ class PursuitController(Node):
         radius = 1.5
 
         # Calculate attractive forces
-        attractive_x = k_att * (data["evader_1"]["x"] - data[self.robot]["x"])
-        attractive_y = k_att * (data["evader_1"]["y"] - data[self.robot]["y"])
+        r_pos = data["evader_1"]
+        lookahead = [math.cos(r_pos["yaw"]) * self.lookahead_d, math.sin(r_pos["yaw"]) * self.lookahead_d]
+        attractive_x = k_att * (r_pos["x"] + lookahead[0] - data[self.robot]["x"])
+        attractive_y = k_att * (r_pos["y"] + lookahead[1] - data[self.robot]["y"])
+
+        # self.publish_debug_dot(lookahead[0], lookahead[1], 0)
 
         # Calculate repulsive forces from team member robots
         total_repulse_x = 0.0
         total_repulse_y = 0.0
         
-        for robot in data.keys():
-            if robot == 'evader_1' or robot == self.robot:
-                continue
+        # for robot in data.keys():
+        #     if robot == 'evader_1' or robot == self.robot:
+        #         continue
 
-        #    teammate_dx = data[robot]['x'] - data[self.robot]['x']
-        #    teammate_dy = data[robot]['y'] - data[self.robot]['y']
-        #    distance = math.sqrt(teammate_dx ** 2 + teammate_dy ** 2)
+        #     teammate_dx = data[robot]['x'] - data[self.robot]['x']
+        #     teammate_dy = data[robot]['y'] - data[self.robot]['y']
+        #     distance = math.sqrt(teammate_dx ** 2 + teammate_dy ** 2)
 
-        #    if distance > 0 and distance <= radius:
-        #        magnitude = 100.0 * (1.0 / distance - 1.0 / radius) * (1.0 / (distance**2))
-        #        total_repulse_x -= magnitude * (teammate_dx / distance)
-        #        total_repulse_y -= magnitude * (teammate_dy / distance)
+        #     if distance > 0 and distance <= radius:
+        #         magnitude = 100.0 * (1.0 / distance - 1.0 / radius)
+        #         total_repulse_x -= magnitude * (teammate_dx / distance)
+        #         total_repulse_y -= magnitude * (teammate_dy / distance)
 
         # Total forces
         F_x = attractive_x + total_repulse_x
@@ -80,6 +89,39 @@ class PursuitController(Node):
         cmd_vel.angular.z = w
 
         self.publisher_.publish(cmd_vel)
+
+    def publish_debug_dot(self, x, y, z):
+        marker = Marker()
+        
+        # Must match the fixed frame of your world/robot
+        marker.header.frame_id = self.robot  
+        marker.header.stamp = self.get_clock().now().to_msg()
+        
+        marker.ns = "robot_targets"
+        marker.id = 1
+        marker.type = Marker.SPHERE
+        marker.action = Marker.ADD
+        
+        # Dynamically assigned coordinates from the robot logic
+        marker.pose.position.x = x
+        marker.pose.position.y = y
+        marker.pose.position.z = z
+        
+        # Scale (Size)
+        marker.scale.x = 0.15
+        marker.scale.y = 0.15
+        marker.scale.z = 0.15
+        
+        # Color: Bright Green for target positions
+        marker.color.r = 0.0
+        marker.color.g = 1.0
+        marker.color.b = 0.0
+        marker.color.a = 1.0
+        
+        # Give it a short lifetime so old dots disappear as the robot moves
+        marker.lifetime = rclpy.duration.Duration(seconds=0.5).to_msg()
+        
+        self.marker_pub.publish(marker)
 
 def main(args=None):
     rclpy.init(args=args)

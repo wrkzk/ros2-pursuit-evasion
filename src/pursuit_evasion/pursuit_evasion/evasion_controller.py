@@ -46,7 +46,7 @@ class EvasionController(Node):
                 F_x -= magnitude * (pursuer_dx / distance)
                 F_y -= magnitude * (pursuer_dy / distance)
 
-        self.get_logger().info(f'F_x: {F_x}, F_y: {F_y}')
+        # self.get_logger().info(f'F_x: {F_x}, F_y: {F_y}')
 
         F_magnitude = math.sqrt(F_x ** 2 + F_y ** 2)
         desired_heading = math.atan2(F_y, F_x)
