@@ -28,22 +28,23 @@ class PursuitController(Node):
             
     def control_loop(self, msg):
         data = json.loads(msg.data)
+        # self.get_logger().info(msg.data)
 
         # Tuning parameters
         k_att = 1.0
         radius = 1.5
 
         # Calculate attractive forces
-        attractive_x = k_att * (data["evader"]["x"] - data[self.robot]["x"])
-        attractive_y = k_att * (data["evader"]["y"] - data[self.robot]["y"])
+        attractive_x = k_att * (data["evader_1"]["x"] - data[self.robot]["x"])
+        attractive_y = k_att * (data["evader_1"]["y"] - data[self.robot]["y"])
 
         # Calculate repulsive forces from team member robots
         total_repulse_x = 0.0
         total_repulse_y = 0.0
         
-        #for robot in data.keys():
-        #    if robot == 'evader' or robot == self.robot:
-        #        continue
+        for robot in data.keys():
+            if robot == 'evader_1' or robot == self.robot:
+                continue
 
         #    teammate_dx = data[robot]['x'] - data[self.robot]['x']
         #    teammate_dy = data[robot]['y'] - data[self.robot]['y']
