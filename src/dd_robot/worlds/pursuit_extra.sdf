@@ -1,0 +1,84 @@
+<!-- 
+    <model name="bounding_walls">
+      <static>true</static>
+
+      <!-- North Wall -->
+      <link name="north_wall">
+        <pose>0 5 1 0 0 0</pose>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>10 0.1 2</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>10 0.1 2</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+
+    
+      <!-- South Wall -->
+      <link name="south_wall">
+        <pose>0 -15 1 0 0 0</pose>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>10 0.1 2</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>10 0.1 2</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+
+      
+      <!-- East Wall -->
+      <link name="east_wall">
+        <pose>5 0 1 0 0 1.5707</pose>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>10 0.1 2</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>10 0.1 2</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+
+      
+      <!-- West Wall -->
+      <link name="west_wall">
+        <pose>-5 0 1 0 0 1.5707</pose>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>10 0.1 2</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>10 0.1 2</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+    </model> 
+    -->
