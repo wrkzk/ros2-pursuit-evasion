@@ -11,17 +11,22 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
 
+    # Force software rendering (NVIDIA graphics not working)
+    os.environ['MESA_LOADER_DRIVER_OVERRIDE'] = 'kms_swrast'
+    os.environ['MESA_GL_VERSION_OVERRIDE'] = '3.3'
+    os.environ['QT_QPA_PLATFORM'] = 'xcb'
+
     # Packages we are using
     pkg_ros_gz = get_package_share_directory('ros_gz_sim')
     pkg_dd_robot = get_package_share_directory('dd_robot')
 
     # Define the robots that we want to spawn in
     robots = [
-        { 'name': 'pursuer_2', 'x': '-2.5', 'y': '2.5', 'lookahead' : 5.0},
-        { 'name': 'pursuer_3', 'x': '-2.5', 'y': '-2.5', 'lookahead' : 5.0},
-        { 'name': 'pursuer_4', 'x': '2.5', 'y': '2.5', 'lookahead' : 5.0},
-        { 'name': 'pursuer_5', 'x': '2.5', 'y': '-2.5', 'lookahead' : 5.0},
-        { 'name': 'evader_1',  'x': '0.0', 'y': '0.0' }
+        { 'name': 'pursuer_1', 'x': '-2.5', 'y': '2.5', 'lookahead' : 2.0},
+        { 'name': 'pursuer_2', 'x': '-2.5', 'y': '-2.5', 'lookahead' : 2.0},
+        #{ 'name': 'pursuer_3', 'x': '2.5', 'y': '2.5', 'lookahead' : 5.0},
+        #{ 'name': 'pursuer_4', 'x': '2.5', 'y': '-2.5', 'lookahead' : 5.0},
+        { 'name': 'evader_1',  'x': '1.0', 'y': '0.0' }
     ]
 
     # Initialize custom robot based on urdf file
@@ -84,7 +89,7 @@ def generate_launch_description():
             arguments = [
                 f'/model/{robot_name}/cmd_vel@geometry_msgs/msg/Twist]gz.msgs.Twist',
                 f'/model/{robot_name}/pose@geometry_msgs/msg/Pose[gz.msgs.Pose',
-                f'/model/{robot_name}/scan@sensor_msgs/msg/LaserScan@gz.msgs.LaserScan'
+                f'/model/{robot_name}/scan@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan'
             ],
             remappings = [
                 (f'/model/{robot_name}/cmd_vel', f'/{robot_name}/cmd_vel'),

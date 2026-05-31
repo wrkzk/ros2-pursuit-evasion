@@ -5,6 +5,7 @@ import math
 from rclpy.node import Node
 from std_msgs.msg import String
 from geometry_msgs.msg import Twist
+from sensor_msgs.msg import LaserScan
 
 class EvasionController(Node):
 
@@ -25,6 +26,18 @@ class EvasionController(Node):
             self.control_loop,
             10
         )
+
+        # Subscriber that listens to /<robot>/scan and updates latest scan var
+        self.latest_scan = None
+        self.create_subscription(
+            LaserScan,
+            f'/{self.robot}/scan',
+            self.scan_callback,
+            10
+        )
+
+    def scan_callback(self, msg):
+        self.latest_scan = msg
             
     def control_loop(self, msg):
         data = json.loads(msg.data)
@@ -46,6 +59,23 @@ class EvasionController(Node):
                 F_x -= magnitude * (pursuer_dx / distance)
                 F_y -= magnitude * (pursuer_dy / distance)
 
+        # Forces from static obstacles
+        if self.latest_scan:
+            robot_yaw = data[self.robot]['yaw']
+
+            step_size = 5
+            for i in range(0, len(self.latest_scan.ranges), step_size):
+                distance = self.latest_scan.ranges[i]
+
+                if 0.1 < distance < 2.0:
+                    self.get_logger().info('Obstacle Detected', throttle_duration_sec=1.0)
+
+                    local_angle = self.latest_scan.angle_min + (i * self.latest_scan.angle_increment)
+                    global_angle = robot_yaw + local_angle
+                    magnitude = 1.0 * (1.0 / (distance ** 2))
+                    F_x -= magnitude * math.cos(global_angle)
+                    F_y -= magnitude * math.sin(global_angle)
+
         F_magnitude = math.sqrt(F_x ** 2 + F_y ** 2)
         desired_heading = math.atan2(F_y, F_x)
 
@@ -53,7 +83,7 @@ class EvasionController(Node):
         heading_error = (heading_error + math.pi) % (2 * math.pi) - math.pi
 
         # Calculate linear and angular velocity
-        max_turn_vel = 1.0
+        max_turn_vel = 2.0
         max_linear_vel = 1.0
         
         kw = 2.0
@@ -63,8 +93,8 @@ class EvasionController(Node):
         v = kv * F_magnitude
 
         cmd_vel = Twist()
-        cmd_vel.linear.x = v
-        cmd_vel.angular.z = w
+        cmd_vel.linear.x = max(min(v, max_linear_vel), 0.0)
+        cmd_vel.angular.z = max(min(w, max_turn_vel), -max_turn_vel)
 
         self.publisher_.publish(cmd_vel)
 

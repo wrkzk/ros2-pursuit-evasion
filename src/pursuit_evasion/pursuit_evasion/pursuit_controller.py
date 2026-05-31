@@ -6,6 +6,7 @@ from rclpy.node import Node
 from std_msgs.msg import String
 from geometry_msgs.msg import Twist
 from visualization_msgs.msg import Marker
+from sensor_msgs.msg import LaserScan
 
 class PursuitController(Node):
 
@@ -30,6 +31,18 @@ class PursuitController(Node):
             self.control_loop,
             10
         )
+
+        # Subscriber that listens to /<robot>/scan and updates latest scan var
+        self.latest_scan = None
+        self.create_subscription(
+            LaserScan,
+            f'/{self.robot}/scan',
+            self.scan_callback,
+            10
+        )
+
+    def scan_callback(self, msg):
+        self.latest_scan = msg
             
     def control_loop(self, msg):
         data = json.loads(msg.data)
@@ -50,6 +63,9 @@ class PursuitController(Node):
         # Calculate repulsive forces from team member robots
         total_repulse_x = 0.0
         total_repulse_y = 0.0
+
+        F_x = 0.0
+        F_y = 0.0
         
         for robot in data.keys():
             if robot == 'evader_1' or robot == self.robot:
@@ -64,9 +80,39 @@ class PursuitController(Node):
                 total_repulse_x -= magnitude * (teammate_dx / distance)
                 total_repulse_y -= magnitude * (teammate_dy / distance)
 
+        # Forces from static obstacles
+        if self.latest_scan:
+            robot_yaw = data[self.robot]['yaw']
+            robot_x = data[self.robot]['x']
+            robot_y = data[self.robot]['y']
+
+            evader_x = data['evader_1']['x']
+            evader_y = data['evader_1']['y']
+
+            step_size = 5
+            for i in range(0, len(self.latest_scan.ranges), step_size):
+                distance = self.latest_scan.ranges[i]
+
+                if 0.1 < distance < 2.0:
+                    local_angle = self.latest_scan.angle_min + (i * self.latest_scan.angle_increment)
+                    global_angle = robot_yaw + local_angle
+
+                    # Compare the object detected by lidar to the known evader pose
+                    # If these are within a certain threshold, then ignore
+                    estimated_x = robot_x + distance * math.cos(global_angle)
+                    estimated_y = robot_y + distance * math.sin(global_angle)
+                    offset = math.sqrt((estimated_x - evader_x) ** 2 + (estimated_y - evader_y) ** 2)
+
+                    if offset < 0.4:
+                        continue
+
+                    magnitude = 1.0 * (1.0 / (distance ** 2))
+                    F_x -= magnitude * math.cos(global_angle)
+                    F_y -= magnitude * math.sin(global_angle)
+
         # Total forces
-        F_x = attractive_x + total_repulse_x
-        F_y = attractive_y + total_repulse_y
+        F_x += attractive_x + total_repulse_x
+        F_y += attractive_y + total_repulse_y
 
         F_magnitude = math.sqrt(F_x ** 2 + F_y ** 2)
         desired_heading = math.atan2(F_y, F_x)
@@ -75,7 +121,7 @@ class PursuitController(Node):
         heading_error = (heading_error + math.pi) % (2 * math.pi) - math.pi
 
         # Calculate linear and angular velocity
-        max_turn_vel = 1.0
+        max_turn_vel = 2.0
         max_linear_vel = 1.0
         
         kw = 2.0
@@ -85,8 +131,8 @@ class PursuitController(Node):
         v = kv * F_magnitude
 
         cmd_vel = Twist()
-        cmd_vel.linear.x = v
-        cmd_vel.angular.z = w
+        cmd_vel.linear.x = max(min(v, max_linear_vel), 0.0)
+        cmd_vel.angular.z = max(min(w, max_turn_vel), -max_turn_vel)
 
         self.publisher_.publish(cmd_vel)
 

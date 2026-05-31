@@ -1,64 +1,4 @@
 <?xml version="1.0" ?>
-<!--
-  Try inserting a model:
-
-gz service -s /world/empty/create \
---reqtype gz.msgs.EntityFactory \
---reptype gz.msgs.Boolean \
---timeout 300 \
---req 'sdf: '\
-'"<?xml version=\"1.0\" ?>'\
-'<sdf version=\"1.6\">'\
-'<model name=\"spawned_model\">'\
-'<link name=\"link\">'\
-'<visual name=\"visual\">'\
-'<geometry><sphere><radius>1.0</radius></sphere></geometry>'\
-'</visual>'\
-'<collision name=\"visual\">'\
-'<geometry><sphere><radius>1.0</radius></sphere></geometry>'\
-'</collision>'\
-'</link>'\
-'</model>'\
-'</sdf>" '\
-'pose: {position: {z: 10}} '\
-'name: "new_name" '\
-'allow_renaming: true'
-
-  Then try deleting it:
-
-gz service -s /world/empty/remove \
---reqtype gz.msgs.Entity \
---reptype gz.msgs.Boolean \
---timeout 300 \
---req 'name: "new_name" type: MODEL'
-
-  Try inserting a light:
-
-gz service -s /world/empty/create --reqtype gz.msgs.EntityFactory --reptype gz.msgs.Boolean --timeout 300 --req 'sdf: '\
-'"<?xml version=\"1.0\" ?>'\
-'<sdf version=\"1.6\">'\
-'<light name=\"spawned_light\" type=\"directional\">'\
-'<pose>0 0 10 0.1 1.0 0</pose>'\
-'</light>'\
-'</sdf>"'
-
-  Then try deleting it:
-
-gz service -s /world/empty/remove \
---reqtype gz.msgs.Entity \
---reptype gz.msgs.Boolean \
---timeout 300 \
---req 'name: "spawned_light" type: LIGHT'
-
-  Insert a light using a message and allow_renaming:
-
-gz service -s /world/empty/create \
---reqtype gz.msgs.EntityFactory \
---reptype gz.msgs.Boolean \
---timeout 300 \
---req 'allow_renaming: true, light: {name: "spawned_light", type: 2, diffuse: {r: 1}}'
-
--->
 <sdf version="1.6">
   <world name="pursuit_world">
     <physics name="1ms" type="ignored">
@@ -81,6 +21,11 @@ gz service -s /world/empty/create \
       filename="gz-sim-contact-system"
       name="gz::sim::systems::Contact">
     </plugin>
+    <plugin
+      filename="gz-sim-sensors-system"
+      name="gz::sim::systems::Sensors">
+		    <render_engine>ogre2</render_engine>
+		</plugin>
 
     <light type="directional" name="sun">
       <cast_shadows>true</cast_shadows>
@@ -122,7 +67,109 @@ gz service -s /world/empty/create \
         </visual>
       </link>
     </model>
+
+    <model name="obstacles">
+      <static>true</static>
+
+      <link name="obstacle_1">
+        <pose>0 0 0 0 0 0</pose>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.5 0.5 2</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.5 0.5 2</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+    </model>
     
-    
+    <model name="bounding_walls">
+      <static>true</static>
+
+      <!-- North Wall -->
+      <link name="north_wall">
+        <pose>0 5 1 0 0 0</pose>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>10 0.1 2</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>10 0.1 2</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+
+      <!-- South Wall -->
+      <link name="south_wall">
+        <pose>0 -5 1 0 0 0</pose>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>10 0.1 2</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>10 0.1 2</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+
+      
+      <!-- East Wall -->
+      <link name="east_wall">
+        <pose>5 0 1 0 0 1.5707</pose>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>10 0.1 2</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>10 0.1 2</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+
+      
+      <!-- West Wall -->
+      <link name="west_wall">
+        <pose>-5 0 1 0 0 1.5707</pose>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>10 0.1 2</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>10 0.1 2</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+    </model> 
   </world>
 </sdf>
