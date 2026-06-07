@@ -32,14 +32,6 @@ def generate_launch_description():
     # Initialize custom robot based on urdf file
     urdf_file = os.path.join(pkg_dd_robot, 'urdf', 'dd_robot.urdf.xacro')
 
-    # Argument to determine how the evader should escape: with manual control or the APF algorithm
-    escape_method_arg = DeclareLaunchArgument(
-        'escape_strategy',
-        default_value='apf',
-        description='Escape strategy used by the evader'
-    )
-    escape_method = LaunchConfiguration('escape_strategy')
-
     # Argument to determine how the pursuer should try to capture the evader: with vornoi partitioning or pure pursuit
     pursuit_method_arg = DeclareLaunchArgument(
         'pursuit_strategy',
@@ -159,7 +151,7 @@ def generate_launch_description():
 
         if robot_name.split('_')[0] == 'pursuer':
             
-            if escape_method == 'voronoi':
+            if pursuit_method == 'voronoi':
                 controller = Node(
                     package = 'pursuit_evasion',
                     executable = 'pursuit_controller_voronoi',
@@ -173,7 +165,7 @@ def generate_launch_description():
                 )
                 launch_items.append(controller)
 
-            elif escape_method = 'pure':
+            elif pursuit_method = 'pure':
                 controller = Node(
                     package = 'pursuit_evasion',
                     executable = 'pursuit_controller',
