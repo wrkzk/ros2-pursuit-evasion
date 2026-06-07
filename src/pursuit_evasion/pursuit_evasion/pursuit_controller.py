@@ -56,8 +56,6 @@ class PursuitController(Node):
         attractive_x = k_att * (r_pos["x"] + lookahead[0] - data[self.robot]["x"])
         attractive_y = k_att * (r_pos["y"] + lookahead[1] - data[self.robot]["y"])
 
-        # self.publish_debug_dot(lookahead[0], lookahead[1], 0)
-
         # Calculate repulsive forces from team member robots
         total_repulse_x = 0.0
         total_repulse_y = 0.0
