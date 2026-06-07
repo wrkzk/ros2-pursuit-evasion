@@ -19,8 +19,6 @@ class PursuitController(Node):
         self.robot = self.get_parameter('robot').value
         self.lookahead_d = self.get_parameter('lookahead').value
 
-        self.marker_pub = self.create_publisher(Marker, 'debug_marker', 10)
-
         # Publisher that sends velocity commands to the robot's cmd_vel topic
         self.publisher_ = self.create_publisher(Twist, f'/{self.robot}/cmd_vel', 10)
 
