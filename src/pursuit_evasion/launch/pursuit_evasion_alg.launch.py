@@ -4,6 +4,7 @@ from ament_index_python import get_package_share_directory
 
 from launch import LaunchDescription
 from launch.actions import IncludeLaunchDescription
+from launch.actions import DeclareLaunchArgument, LogInfo, Shutdown
 from launch.substitutions import Command
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
@@ -25,12 +26,27 @@ def generate_launch_description():
         { 'name': 'pursuer_1', 'x': '-7.0', 'y': '-7.0' },
         { 'name': 'pursuer_2', 'x': '7.0', 'y': '7.0' },
         { 'name': 'pursuer_3', 'x': '-7.0', 'y': '7.0' },
-        # { 'name': 'pursuer_4', 'x': '7.0', 'y': '-7.0' },
         { 'name': 'evader_1',  'x': '1.0', 'y': '0.0' }
     ]
 
     # Initialize custom robot based on urdf file
     urdf_file = os.path.join(pkg_dd_robot, 'urdf', 'dd_robot.urdf.xacro')
+
+    # Argument to determine how the evader should escape: with manual control or the APF algorithm
+    escape_method_arg = DeclareLaunchArgument(
+        'escape_strategy',
+        default_value='apf',
+        description='Escape strategy used by the evader'
+    )
+    escape_method = LaunchConfiguration('escape_strategy')
+
+    # Argument to determine how the pursuer should try to capture the evader: with vornoi partitioning or pure pursuit
+    pursuit_method_arg = DeclareLaunchArgument(
+        'pursuit_strategy',
+        default_value='voronoi',
+        description='Pursuit strategy used by the pursuer'
+    )
+    pursuit_method = LaunchConfiguration('pursuit_strategy')
 
     # Define the gazebo launch command
     gazebo = IncludeLaunchDescription(
@@ -45,6 +61,7 @@ def generate_launch_description():
         }.items()
     )
 
+    # Spawn the manager node responsible for /sim_state
     manager = Node(
         package = 'pursuit_evasion',
         executable = 'manager',
@@ -56,6 +73,7 @@ def generate_launch_description():
         }]
     )
 
+    # Spawn the supervisor node that runs multiple trials and records time to catch evader
     supervisor = Node(
         package='pursuit_evasion',
         executable='sim_supervisor',
@@ -67,6 +85,7 @@ def generate_launch_description():
         }]
     )
 
+    # Node to keep track of the time
     clock_bridge = Node(
         package='ros_gz_bridge',
         executable='parameter_bridge',
@@ -80,7 +99,8 @@ def generate_launch_description():
         # supervisor,
         clock_bridge
     ]
-    
+
+    # Spawn each of the robots as defined above
     for robot in robots:
 
         robot_name = robot['name']
@@ -91,6 +111,7 @@ def generate_launch_description():
             ' robot_name:=', robot_name
         ])
 
+        # Necessary so that Gazebo knows the geometry of each robot, as defined in the URDF
         robot_state_publisher = Node(
             package = 'robot_state_publisher',
             executable = 'robot_state_publisher',
@@ -103,6 +124,7 @@ def generate_launch_description():
             }]
         )
 
+        # Bridge from Gazebo topics to ROS2 topics
         bridge = Node(
             package = 'ros_gz_bridge',
             executable = 'parameter_bridge',
@@ -119,6 +141,7 @@ def generate_launch_description():
             ]
         )
 
+        # Node that spawns in the robot
         spawn = Node(
             package = 'ros_gz_sim',
             executable = 'create',
@@ -135,18 +158,35 @@ def generate_launch_description():
         )
 
         if robot_name.split('_')[0] == 'pursuer':
-            controller = Node(
-                package = 'pursuit_evasion',
-                executable = 'pursuit_controller_voronoi',
-                namespace = robot_name,
-                name = f'{robot_name}_controller',
-                output = 'screen',
-                parameters = [{
-                    'robot': f'{robot_name}',
-                    'use_sim_time': True
-                }]
-            )
-            launch_items.append(controller)
+            
+            if escape_method == 'voronoi':
+                controller = Node(
+                    package = 'pursuit_evasion',
+                    executable = 'pursuit_controller_voronoi',
+                    namespace = robot_name,
+                    name = f'{robot_name}_controller',
+                    output = 'screen',
+                    parameters = [{
+                        'robot': f'{robot_name}',
+                        'use_sim_time': True
+                    }]
+                )
+                launch_items.append(controller)
+
+            elif escape_method = 'pure':
+                controller = Node(
+                    package = 'pursuit_evasion',
+                    executable = 'pursuit_controller',
+                    namespace = robot_name,
+                    name = f'{robot_name}_controller',
+                    output = 'screen',
+                    parameters = [{
+                        'robot': f'{robot_name}',
+                        'use_sim_time': True
+                    }]
+                )
+                launch_items.append(controller)
+
 
         if robot_name.split('_')[0] == 'evader':
             controller = Node(
