@@ -93,7 +93,7 @@ class PursuitController(Node):
             for i in range(0, len(self.latest_scan.ranges), step_size):
                 distance = self.latest_scan.ranges[i]
 
-                if 0.1 < distance < 2.0:
+                if 0.1 < distance < 1.0:
                     local_angle = self.latest_scan.angle_min + (i * self.latest_scan.angle_increment)
                     global_angle = robot_yaw + local_angle
 

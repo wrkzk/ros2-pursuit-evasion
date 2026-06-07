@@ -1,0 +1,297 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <world name="pursuit_world">
+
+    <gui fullscreen="0">
+      <camera name="user_camera">
+        <pose>0 0 55 0 1.5707 1.5707</pose>
+        <view_controller>orbit</view_controller>
+        <projection_type>orthographic</projection_type>
+      </camera>
+    </gui>
+
+    <physics name="1ms" type="ignored">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1.5</real_time_factor>
+      <real_time_update_rate>1000</real_time_update_rate>
+    </physics>
+
+    <plugin filename="gz-sim-physics-system"           name="gz::sim::systems::Physics"/>
+    <plugin filename="gz-sim-user-commands-system"     name="gz::sim::systems::UserCommands"/>
+    <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster"/>
+    <plugin filename="gz-sim-contact-system"           name="gz::sim::systems::Contact"/>
+    <plugin filename="gz-sim-sensors-system"           name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+
+    <light type="directional" name="sun">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 20 0 0 0</pose>
+      <diffuse>0.85 0.85 0.85 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <attenuation>
+        <range>1000</range>
+        <constant>0.9</constant>
+        <linear>0.01</linear>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
+
+    <!-- Ground -->
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry><plane><normal>0 0 1</normal><size>200 200</size></plane></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><plane><normal>0 0 1</normal><size>200 200</size></plane></geometry>
+          <material>
+            <ambient>0.68 0.68 0.68 1</ambient>
+            <diffuse>0.68 0.68 0.68 1</diffuse>
+            <specular>0.68 0.68 0.68 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!--
+      Circular arena boundary: radius 12m, approximated with 24 wall segments.
+      Each segment subtends 15 degrees.
+      Segment length = 2 * 12 * sin(pi/24) = 2 * 12 * 0.13053 = 3.133m
+      Segment center radius = 12 * cos(pi/24) = 12 * 0.99144 = 11.897m
+      Each wall is 3.2m wide (slight overlap), 0.3m thick, 2.5m tall.
+      Pose angle = segment_index * 15 degrees (pi/12 radians)
+      Center position = (11.897 * cos(angle), 11.897 * sin(angle))
+      Wall faces inward so rotation = angle + pi/2
+    -->
+    <model name="circular_boundary">
+      <static>true</static>
+
+      <!-- seg 0: angle=0.000 pos=(11.897, 0.000) rot=1.571 -->
+      <link name="seg_0"><pose>11.897 0.000 1.25 0 0 1.571</pose>
+        <collision name="c"><geometry><box><size>3.2 0.3 2.5</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>3.2 0.3 2.5</size></box></geometry>
+          <material><ambient>0.30 0.30 0.40 1</ambient><diffuse>0.30 0.30 0.40 1</diffuse></material></visual>
+      </link>
+
+      <!-- seg 1: angle=0.262 pos=(11.530, 3.086) rot=1.833 -->
+      <link name="seg_1"><pose>11.530 3.086 1.25 0 0 1.833</pose>
+        <collision name="c"><geometry><box><size>3.2 0.3 2.5</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>3.2 0.3 2.5</size></box></geometry>
+          <material><ambient>0.30 0.30 0.40 1</ambient><diffuse>0.30 0.30 0.40 1</diffuse></material></visual>
+      </link>
+
+      <!-- seg 2: angle=0.524 pos=(10.456, 5.854) rot=2.094 -->
+      <link name="seg_2"><pose>10.456 5.854 1.25 0 0 2.094</pose>
+        <collision name="c"><geometry><box><size>3.2 0.3 2.5</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>3.2 0.3 2.5</size></box></geometry>
+          <material><ambient>0.30 0.30 0.40 1</ambient><diffuse>0.30 0.30 0.40 1</diffuse></material></visual>
+      </link>
+
+      <!-- seg 3: angle=0.785 pos=(8.413, 8.413) rot=2.356 -->
+      <link name="seg_3"><pose>8.413 8.413 1.25 0 0 2.356</pose>
+        <collision name="c"><geometry><box><size>3.2 0.3 2.5</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>3.2 0.3 2.5</size></box></geometry>
+          <material><ambient>0.30 0.30 0.40 1</ambient><diffuse>0.30 0.30 0.40 1</diffuse></material></visual>
+      </link>
+
+      <!-- seg 4: angle=1.047 pos=(5.854, 10.456) rot=2.618 -->
+      <link name="seg_4"><pose>5.854 10.456 1.25 0 0 2.618</pose>
+        <collision name="c"><geometry><box><size>3.2 0.3 2.5</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>3.2 0.3 2.5</size></box></geometry>
+          <material><ambient>0.30 0.30 0.40 1</ambient><diffuse>0.30 0.30 0.40 1</diffuse></material></visual>
+      </link>
+
+      <!-- seg 5: angle=1.309 pos=(3.086, 11.530) rot=2.880 -->
+      <link name="seg_5"><pose>3.086 11.530 1.25 0 0 2.880</pose>
+        <collision name="c"><geometry><box><size>3.2 0.3 2.5</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>3.2 0.3 2.5</size></box></geometry>
+          <material><ambient>0.30 0.30 0.40 1</ambient><diffuse>0.30 0.30 0.40 1</diffuse></material></visual>
+      </link>
+
+      <!-- seg 6: angle=1.571 pos=(0.000, 11.897) rot=3.142 -->
+      <link name="seg_6"><pose>0.000 11.897 1.25 0 0 3.142</pose>
+        <collision name="c"><geometry><box><size>3.2 0.3 2.5</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>3.2 0.3 2.5</size></box></geometry>
+          <material><ambient>0.30 0.30 0.40 1</ambient><diffuse>0.30 0.30 0.40 1</diffuse></material></visual>
+      </link>
+
+      <!-- seg 7: angle=1.833 pos=(-3.086, 11.530) rot=3.403 -->
+      <link name="seg_7"><pose>-3.086 11.530 1.25 0 0 3.403</pose>
+        <collision name="c"><geometry><box><size>3.2 0.3 2.5</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>3.2 0.3 2.5</size></box></geometry>
+          <material><ambient>0.30 0.30 0.40 1</ambient><diffuse>0.30 0.30 0.40 1</diffuse></material></visual>
+      </link>
+
+      <!-- seg 8: angle=2.094 pos=(-5.854, 10.456) rot=3.665 -->
+      <link name="seg_8"><pose>-5.854 10.456 1.25 0 0 3.665</pose>
+        <collision name="c"><geometry><box><size>3.2 0.3 2.5</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>3.2 0.3 2.5</size></box></geometry>
+          <material><ambient>0.30 0.30 0.40 1</ambient><diffuse>0.30 0.30 0.40 1</diffuse></material></visual>
+      </link>
+
+      <!-- seg 9: angle=2.356 pos=(-8.413, 8.413) rot=3.927 -->
+      <link name="seg_9"><pose>-8.413 8.413 1.25 0 0 3.927</pose>
+        <collision name="c"><geometry><box><size>3.2 0.3 2.5</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>3.2 0.3 2.5</size></box></geometry>
+          <material><ambient>0.30 0.30 0.40 1</ambient><diffuse>0.30 0.30 0.40 1</diffuse></material></visual>
+      </link>
+
+      <!-- seg 10: angle=2.618 pos=(-10.456, 5.854) rot=4.189 -->
+      <link name="seg_10"><pose>-10.456 5.854 1.25 0 0 4.189</pose>
+        <collision name="c"><geometry><box><size>3.2 0.3 2.5</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>3.2 0.3 2.5</size></box></geometry>
+          <material><ambient>0.30 0.30 0.40 1</ambient><diffuse>0.30 0.30 0.40 1</diffuse></material></visual>
+      </link>
+
+      <!-- seg 11: angle=2.880 pos=(-11.530, 3.086) rot=4.451 -->
+      <link name="seg_11"><pose>-11.530 3.086 1.25 0 0 4.451</pose>
+        <collision name="c"><geometry><box><size>3.2 0.3 2.5</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>3.2 0.3 2.5</size></box></geometry>
+          <material><ambient>0.30 0.30 0.40 1</ambient><diffuse>0.30 0.30 0.40 1</diffuse></material></visual>
+      </link>
+
+      <!-- seg 12: angle=3.142 pos=(-11.897, 0.000) rot=4.712 -->
+      <link name="seg_12"><pose>-11.897 0.000 1.25 0 0 4.712</pose>
+        <collision name="c"><geometry><box><size>3.2 0.3 2.5</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>3.2 0.3 2.5</size></box></geometry>
+          <material><ambient>0.30 0.30 0.40 1</ambient><diffuse>0.30 0.30 0.40 1</diffuse></material></visual>
+      </link>
+
+      <!-- seg 13: angle=3.403 pos=(-11.530, -3.086) rot=4.974 -->
+      <link name="seg_13"><pose>-11.530 -3.086 1.25 0 0 4.974</pose>
+        <collision name="c"><geometry><box><size>3.2 0.3 2.5</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>3.2 0.3 2.5</size></box></geometry>
+          <material><ambient>0.30 0.30 0.40 1</ambient><diffuse>0.30 0.30 0.40 1</diffuse></material></visual>
+      </link>
+
+      <!-- seg 14: angle=3.665 pos=(-10.456, -5.854) rot=5.236 -->
+      <link name="seg_14"><pose>-10.456 -5.854 1.25 0 0 5.236</pose>
+        <collision name="c"><geometry><box><size>3.2 0.3 2.5</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>3.2 0.3 2.5</size></box></geometry>
+          <material><ambient>0.30 0.30 0.40 1</ambient><diffuse>0.30 0.30 0.40 1</diffuse></material></visual>
+      </link>
+
+      <!-- seg 15: angle=3.927 pos=(-8.413, -8.413) rot=5.498 -->
+      <link name="seg_15"><pose>-8.413 -8.413 1.25 0 0 5.498</pose>
+        <collision name="c"><geometry><box><size>3.2 0.3 2.5</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>3.2 0.3 2.5</size></box></geometry>
+          <material><ambient>0.30 0.30 0.40 1</ambient><diffuse>0.30 0.30 0.40 1</diffuse></material></visual>
+      </link>
+
+      <!-- seg 16: angle=4.189 pos=(-5.854, -10.456) rot=5.760 -->
+      <link name="seg_16"><pose>-5.854 -10.456 1.25 0 0 5.760</pose>
+        <collision name="c"><geometry><box><size>3.2 0.3 2.5</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>3.2 0.3 2.5</size></box></geometry>
+          <material><ambient>0.30 0.30 0.40 1</ambient><diffuse>0.30 0.30 0.40 1</diffuse></material></visual>
+      </link>
+
+      <!-- seg 17: angle=4.451 pos=(-3.086, -11.530) rot=6.021 -->
+      <link name="seg_17"><pose>-3.086 -11.530 1.25 0 0 6.021</pose>
+        <collision name="c"><geometry><box><size>3.2 0.3 2.5</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>3.2 0.3 2.5</size></box></geometry>
+          <material><ambient>0.30 0.30 0.40 1</ambient><diffuse>0.30 0.30 0.40 1</diffuse></material></visual>
+      </link>
+
+      <!-- seg 18: angle=4.712 pos=(0.000, -11.897) rot=6.283 -->
+      <link name="seg_18"><pose>0.000 -11.897 1.25 0 0 6.283</pose>
+        <collision name="c"><geometry><box><size>3.2 0.3 2.5</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>3.2 0.3 2.5</size></box></geometry>
+          <material><ambient>0.30 0.30 0.40 1</ambient><diffuse>0.30 0.30 0.40 1</diffuse></material></visual>
+      </link>
+
+      <!-- seg 19: angle=4.974 pos=(3.086, -11.530) rot=0.262 -->
+      <link name="seg_19"><pose>3.086 -11.530 1.25 0 0 0.262</pose>
+        <collision name="c"><geometry><box><size>3.2 0.3 2.5</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>3.2 0.3 2.5</size></box></geometry>
+          <material><ambient>0.30 0.30 0.40 1</ambient><diffuse>0.30 0.30 0.40 1</diffuse></material></visual>
+      </link>
+
+      <!-- seg 20: angle=5.236 pos=(5.854, -10.456) rot=0.524 -->
+      <link name="seg_20"><pose>5.854 -10.456 1.25 0 0 0.524</pose>
+        <collision name="c"><geometry><box><size>3.2 0.3 2.5</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>3.2 0.3 2.5</size></box></geometry>
+          <material><ambient>0.30 0.30 0.40 1</ambient><diffuse>0.30 0.30 0.40 1</diffuse></material></visual>
+      </link>
+
+      <!-- seg 21: angle=5.498 pos=(8.413, -8.413) rot=0.785 -->
+      <link name="seg_21"><pose>8.413 -8.413 1.25 0 0 0.785</pose>
+        <collision name="c"><geometry><box><size>3.2 0.3 2.5</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>3.2 0.3 2.5</size></box></geometry>
+          <material><ambient>0.30 0.30 0.40 1</ambient><diffuse>0.30 0.30 0.40 1</diffuse></material></visual>
+      </link>
+
+      <!-- seg 22: angle=5.760 pos=(10.456, -5.854) rot=1.047 -->
+      <link name="seg_22"><pose>10.456 -5.854 1.25 0 0 1.047</pose>
+        <collision name="c"><geometry><box><size>3.2 0.3 2.5</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>3.2 0.3 2.5</size></box></geometry>
+          <material><ambient>0.30 0.30 0.40 1</ambient><diffuse>0.30 0.30 0.40 1</diffuse></material></visual>
+      </link>
+
+      <!-- seg 23: angle=6.021 pos=(11.530, -3.086) rot=1.309 -->
+      <link name="seg_23"><pose>11.530 -3.086 1.25 0 0 1.309</pose>
+        <collision name="c"><geometry><box><size>3.2 0.3 2.5</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>3.2 0.3 2.5</size></box></geometry>
+          <material><ambient>0.30 0.30 0.40 1</ambient><diffuse>0.30 0.30 0.40 1</diffuse></material></visual>
+      </link>
+
+    </model>
+
+    <!--
+      6 cylindrical pillars on an inner ring at radius 6m,
+      every 60 degrees: angles 0, 60, 120, 180, 240, 300
+      Positions: (6,0), (3, 5.196), (-3, 5.196), (-6, 0), (-3,-5.196), (3,-5.196)
+      Radius 0.7m — substantial enough to force routing decisions
+      but isolated so no corridors are created.
+    -->
+    <model name="pillars">
+      <static>true</static>
+
+      <link name="pillar_0">
+        <pose>6.0 0.0 0 0 0 0</pose>
+        <collision name="c"><geometry><cylinder><radius>0.7</radius><length>2.5</length></cylinder></geometry></collision>
+        <visual name="v"><geometry><cylinder><radius>0.7</radius><length>2.5</length></cylinder></geometry>
+          <material><ambient>0.38 0.38 0.52 1</ambient><diffuse>0.38 0.38 0.52 1</diffuse></material></visual>
+      </link>
+
+      <link name="pillar_1">
+        <pose>3.0 5.196 0 0 0 0</pose>
+        <collision name="c"><geometry><cylinder><radius>0.7</radius><length>2.5</length></cylinder></geometry></collision>
+        <visual name="v"><geometry><cylinder><radius>0.7</radius><length>2.5</length></cylinder></geometry>
+          <material><ambient>0.38 0.38 0.52 1</ambient><diffuse>0.38 0.38 0.52 1</diffuse></material></visual>
+      </link>
+
+      <link name="pillar_2">
+        <pose>-3.0 5.196 0 0 0 0</pose>
+        <collision name="c"><geometry><cylinder><radius>0.7</radius><length>2.5</length></cylinder></geometry></collision>
+        <visual name="v"><geometry><cylinder><radius>0.7</radius><length>2.5</length></cylinder></geometry>
+          <material><ambient>0.38 0.38 0.52 1</ambient><diffuse>0.38 0.38 0.52 1</diffuse></material></visual>
+      </link>
+
+      <link name="pillar_3">
+        <pose>-6.0 0.0 0 0 0 0</pose>
+        <collision name="c"><geometry><cylinder><radius>0.7</radius><length>2.5</length></cylinder></geometry></collision>
+        <visual name="v"><geometry><cylinder><radius>0.7</radius><length>2.5</length></cylinder></geometry>
+          <material><ambient>0.38 0.38 0.52 1</ambient><diffuse>0.38 0.38 0.52 1</diffuse></material></visual>
+      </link>
+
+      <link name="pillar_4">
+        <pose>-3.0 -5.196 0 0 0 0</pose>
+        <collision name="c"><geometry><cylinder><radius>0.7</radius><length>2.5</length></cylinder></geometry></collision>
+        <visual name="v"><geometry><cylinder><radius>0.7</radius><length>2.5</length></cylinder></geometry>
+          <material><ambient>0.38 0.38 0.52 1</ambient><diffuse>0.38 0.38 0.52 1</diffuse></material></visual>
+      </link>
+
+      <link name="pillar_5">
+        <pose>3.0 -5.196 0 0 0 0</pose>
+        <collision name="c"><geometry><cylinder><radius>0.7</radius><length>2.5</length></cylinder></geometry></collision>
+        <visual name="v"><geometry><cylinder><radius>0.7</radius><length>2.5</length></cylinder></geometry>
+          <material><ambient>0.38 0.38 0.52 1</ambient><diffuse>0.38 0.38 0.52 1</diffuse></material></visual>
+      </link>
+
+    </model>
+
+  </world>
+</sdf>

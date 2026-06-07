@@ -1,0 +1,169 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <world name="pursuit_world">
+    <gui fullscreen="0">
+      <camera name="user_camera">
+        <projection_type>orthographic</projection_type>
+        <pose>0 0 20 0 1.5708 0</pose>
+      </camera>
+    </gui>
+
+    <physics name="1ms" type="ignored">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>5.0</real_time_factor>
+      <real_time_update_rate>1000</real_time_update_rate>
+    </physics>
+
+    <plugin filename="gz-sim-physics-system"           name="gz::sim::systems::Physics"/>
+    <plugin filename="gz-sim-user-commands-system"     name="gz::sim::systems::UserCommands"/>
+    <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster"/>
+    <plugin filename="gz-sim-contact-system"           name="gz::sim::systems::Contact"/>
+    <plugin filename="gz-sim-sensors-system"           name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+
+    <light type="directional" name="sun">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <attenuation>
+        <range>1000</range>
+        <constant>0.9</constant>
+        <linear>0.01</linear>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
+
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry><plane><normal>0 0 1</normal><size>100 100</size></plane></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><plane><normal>0 0 1</normal><size>100 100</size></plane></geometry>
+          <material>
+            <ambient>0.72 0.72 0.72 1</ambient>
+            <diffuse>0.72 0.72 0.72 1</diffuse>
+            <specular>0.72 0.72 0.72 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Bounding walls: 20x20 arena -->
+    <model name="bounding_walls">
+      <static>true</static>
+
+      <link name="north_wall">
+        <pose>0 10 1 0 0 0</pose>
+        <collision name="collision"><geometry><box><size>20.0 0.2 2.0</size></box></geometry></collision>
+        <visual name="visual">
+          <geometry><box><size>20.0 0.2 2.0</size></box></geometry>
+          <material><ambient>0.35 0.35 0.45 1</ambient><diffuse>0.35 0.35 0.45 1</diffuse></material>
+        </visual>
+      </link>
+
+      <link name="south_wall">
+        <pose>0 -10 1 0 0 0</pose>
+        <collision name="collision"><geometry><box><size>20.0 0.2 2.0</size></box></geometry></collision>
+        <visual name="visual">
+          <geometry><box><size>20.0 0.2 2.0</size></box></geometry>
+          <material><ambient>0.35 0.35 0.45 1</ambient><diffuse>0.35 0.35 0.45 1</diffuse></material>
+        </visual>
+      </link>
+
+      <link name="east_wall">
+        <pose>10 0 1 0 0 0</pose>
+        <collision name="collision"><geometry><box><size>0.2 20.0 2.0</size></box></geometry></collision>
+        <visual name="visual">
+          <geometry><box><size>0.2 20.0 2.0</size></box></geometry>
+          <material><ambient>0.35 0.35 0.45 1</ambient><diffuse>0.35 0.35 0.45 1</diffuse></material>
+        </visual>
+      </link>
+
+      <link name="west_wall">
+        <pose>-10 0 1 0 0 0</pose>
+        <collision name="collision"><geometry><box><size>0.2 20.0 2.0</size></box></geometry></collision>
+        <visual name="visual">
+          <geometry><box><size>0.2 20.0 2.0</size></box></geometry>
+          <material><ambient>0.35 0.35 0.45 1</ambient><diffuse>0.35 0.35 0.45 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!--
+      5 cylindrical pillars scattered across the arena.
+      Radius 0.6m each — small enough that robots can easily
+      route around them without getting trapped.
+      Placed away from spawn points (-2.5, ±2.5) and (1, 0).
+    -->
+    <model name="pillars">
+      <static>true</static>
+
+      <!-- pillar 1: top-left quadrant -->
+      <link name="pillar_1">
+        <pose>-5 6 0 0 0 0</pose>
+        <collision name="collision">
+          <geometry><cylinder><radius>0.6</radius><length>2.0</length></cylinder></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><cylinder><radius>0.6</radius><length>2.0</length></cylinder></geometry>
+          <material><ambient>0.4 0.4 0.55 1</ambient><diffuse>0.4 0.4 0.55 1</diffuse></material>
+        </visual>
+      </link>
+
+      <!-- pillar 2: top-right quadrant -->
+      <link name="pillar_2">
+        <pose>6 5 0 0 0 0</pose>
+        <collision name="collision">
+          <geometry><cylinder><radius>0.6</radius><length>2.0</length></cylinder></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><cylinder><radius>0.6</radius><length>2.0</length></cylinder></geometry>
+          <material><ambient>0.4 0.4 0.55 1</ambient><diffuse>0.4 0.4 0.55 1</diffuse></material>
+        </visual>
+      </link>
+
+      <!-- pillar 3: center, slightly offset so it doesn't block spawn -->
+      <link name="pillar_3">
+        <pose>2 2 0 0 0 0</pose>
+        <collision name="collision">
+          <geometry><cylinder><radius>0.6</radius><length>2.0</length></cylinder></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><cylinder><radius>0.6</radius><length>2.0</length></cylinder></geometry>
+          <material><ambient>0.4 0.4 0.55 1</ambient><diffuse>0.4 0.4 0.55 1</diffuse></material>
+        </visual>
+      </link>
+
+      <!-- pillar 4: bottom-left quadrant -->
+      <link name="pillar_4">
+        <pose>-6 -5 0 0 0 0</pose>
+        <collision name="collision">
+          <geometry><cylinder><radius>0.6</radius><length>2.0</length></cylinder></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><cylinder><radius>0.6</radius><length>2.0</length></cylinder></geometry>
+          <material><ambient>0.4 0.4 0.55 1</ambient><diffuse>0.4 0.4 0.55 1</diffuse></material>
+        </visual>
+      </link>
+
+      <!-- pillar 5: bottom-right quadrant -->
+      <link name="pillar_5">
+        <pose>5 -6 0 0 0 0</pose>
+        <collision name="collision">
+          <geometry><cylinder><radius>0.6</radius><length>2.0</length></cylinder></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><cylinder><radius>0.6</radius><length>2.0</length></cylinder></geometry>
+          <material><ambient>0.4 0.4 0.55 1</ambient><diffuse>0.4 0.4 0.55 1</diffuse></material>
+        </visual>
+      </link>
+
+    </model>
+
+  </world>
+</sdf>

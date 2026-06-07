@@ -1,0 +1,348 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <world name="pursuit_world">
+    <gui fullscreen="0">
+      <camera name="user_camera">
+        <pose>0 0 15 0 1.5707 1.5707</pose>
+        <view_controller>orbit</view_controller>
+        <projection_type>orthographic</projection_type>
+      </camera>
+    </gui>
+    <physics name="1ms" type="ignored">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>15.0</real_time_factor>
+      <real_time_update_rate>1000</real_time_update_rate>
+    </physics>
+    <plugin
+      filename="gz-sim-physics-system"
+      name="gz::sim::systems::Physics">
+    </plugin>
+    <plugin
+      filename="gz-sim-user-commands-system"
+      name="gz::sim::systems::UserCommands">
+    </plugin>
+    <plugin
+      filename="gz-sim-scene-broadcaster-system"
+      name="gz::sim::systems::SceneBroadcaster">
+    </plugin>
+    <plugin
+      filename="gz-sim-contact-system"
+      name="gz::sim::systems::Contact">
+    </plugin>
+    <plugin
+      filename="gz-sim-sensors-system"
+      name="gz::sim::systems::Sensors">
+		    <render_engine>ogre2</render_engine>
+		</plugin>
+
+    <light type="directional" name="sun">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <attenuation>
+        <range>1000</range>
+        <constant>0.9</constant>
+        <linear>0.01</linear>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
+    
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>100 100</size>
+            </plane>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>100 100</size>
+            </plane>
+          </geometry>
+          <material>
+            <ambient>0.8 0.8 0.8 1</ambient>
+            <diffuse>0.8 0.8 0.8 1</diffuse>
+            <specular>0.8 0.8 0.8 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+    
+    
+
+<model name="obstacles">
+  <static>true</static>
+
+  <!-- Central vertical spine -->
+  <link name="maze_1">
+    <pose>0 0 1 0 0 0</pose>
+    <collision name="collision">
+      <geometry>
+        <box><size>0.5 12 2</size></box>
+      </geometry>
+    </collision>
+    <visual name="visual">
+      <geometry>
+        <box><size>0.5 12 2</size></box>
+      </geometry>
+    </visual>
+  </link>
+
+  <!-- Upper left branch -->
+  <link name="maze_2">
+    <pose>-3.5 5 1 0 0 0</pose>
+    <collision name="collision">
+      <geometry>
+        <box><size>7 0.5 2</size></box>
+      </geometry>
+    </collision>
+    <visual name="visual">
+      <geometry>
+        <box><size>7 0.5 2</size></box>
+      </geometry>
+    </visual>
+  </link>
+
+  <!-- Upper right branch -->
+  <link name="maze_3">
+    <pose>4.5 7 1 0 0 0</pose>
+    <collision name="collision">
+      <geometry>
+        <box><size>7 0.5 2</size></box>
+      </geometry>
+    </collision>
+    <visual name="visual">
+      <geometry>
+        <box><size>7 0.5 2</size></box>
+      </geometry>
+    </visual>
+  </link>
+
+  <!-- Left vertical -->
+  <link name="maze_4">
+    <pose>-6 1 1 0 0 0</pose>
+    <collision name="collision">
+      <geometry>
+        <box><size>0.5 8 2</size></box>
+      </geometry>
+    </collision>
+    <visual name="visual">
+      <geometry>
+        <box><size>0.5 8 2</size></box>
+      </geometry>
+    </visual>
+  </link>
+
+  <!-- Right vertical -->
+  <link name="maze_5">
+    <pose>6 -1 1 0 0 0</pose>
+    <collision name="collision">
+      <geometry>
+        <box><size>0.5 8 2</size></box>
+      </geometry>
+    </collision>
+    <visual name="visual">
+      <geometry>
+        <box><size>0.5 8 2</size></box>
+      </geometry>
+    </visual>
+  </link>
+
+  <!-- Middle horizontal left -->
+  <link name="maze_6">
+    <pose>-3 -1.5 1 0 0 0</pose>
+    <collision name="collision">
+      <geometry>
+        <box><size>6 0.5 2</size></box>
+      </geometry>
+    </collision>
+    <visual name="visual">
+      <geometry>
+        <box><size>6 0.5 2</size></box>
+      </geometry>
+    </visual>
+  </link>
+
+  <!-- Middle horizontal right -->
+  <link name="maze_7">
+    <pose>3 2 1 0 0 0</pose>
+    <collision name="collision">
+      <geometry>
+        <box><size>6 0.5 2</size></box>
+      </geometry>
+    </collision>
+    <visual name="visual">
+      <geometry>
+        <box><size>6 0.5 2</size></box>
+      </geometry>
+    </visual>
+  </link>
+
+  <!-- Lower left branch -->
+  <link name="maze_8">
+    <pose>-4 -6 1 0 0 0</pose>
+    <collision name="collision">
+      <geometry>
+        <box><size>8 0.5 2</size></box>
+      </geometry>
+    </collision>
+    <visual name="visual">
+      <geometry>
+        <box><size>8 0.5 2</size></box>
+      </geometry>
+    </visual>
+  </link>
+
+  <!-- Lower right branch -->
+  <link name="maze_9">
+    <pose>4 -4 1 0 0 0</pose>
+    <collision name="collision">
+      <geometry>
+        <box><size>8 0.5 2</size></box>
+      </geometry>
+    </collision>
+    <visual name="visual">
+      <geometry>
+        <box><size>8 0.5 2</size></box>
+      </geometry>
+    </visual>
+  </link>
+
+  <!-- Lower center blocker -->
+  <link name="maze_10">
+    <pose>0 -7 1 0 0 0</pose>
+    <collision name="collision">
+      <geometry>
+        <box><size>4 0.5 2</size></box>
+      </geometry>
+    </collision>
+    <visual name="visual">
+      <geometry>
+        <box><size>4 0.5 2</size></box>
+      </geometry>
+    </visual>
+  </link>
+
+  <!-- Small dead-end wall -->
+  <link name="maze_11">
+    <pose>2.5 4.5 1 0 0 0</pose>
+    <collision name="collision">
+      <geometry>
+        <box><size>0.5 3 2</size></box>
+      </geometry>
+    </collision>
+    <visual name="visual">
+      <geometry>
+        <box><size>0.5 3 2</size></box>
+      </geometry>
+    </visual>
+  </link>
+
+  <!-- Small dead-end wall -->
+  <link name="maze_12">
+    <pose>-2.5 -4.5 1 0 0 0</pose>
+    <collision name="collision">
+      <geometry>
+        <box><size>0.5 3 2</size></box>
+      </geometry>
+    </collision>
+    <visual name="visual">
+      <geometry>
+        <box><size>0.5 3 2</size></box>
+      </geometry>
+    </visual>
+  </link>
+
+</model>
+
+    <model name="bounding_walls">
+      <static>true</static>
+
+      <!-- North Wall -->
+      <link name="north_wall">
+        <pose>0 10 1 0 0 0</pose>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>20 0.1 2</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>20 0.1 2</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+
+      <!-- South Wall -->
+      <link name="south_wall">
+        <pose>0 -10 1 0 0 0</pose>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>20 0.1 2</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>20 0.1 2</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+
+      
+      <!-- East Wall -->
+      <link name="east_wall">
+        <pose>10 0 1 0 0 1.5707</pose>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>20 0.1 2</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>20 0.1 2</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+
+      
+      <!-- West Wall -->
+      <link name="west_wall">
+        <pose>-10 0 1 0 0 1.5707</pose>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>20 0.1 2</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>20 0.1 2</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+    </model> 
+  </world>
+</sdf>

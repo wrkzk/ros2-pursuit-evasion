@@ -1,9 +1,17 @@
 <?xml version="1.0" ?>
 <sdf version="1.6">
   <world name="pursuit_world">
+    <gui fullscreen="0">
+      <camera name="user_camera">
+        <pose>0 0 15 0 1.5707 1.5707</pose>
+        <view_controller>orbit</view_controller>
+        <projection_type>orthographic</projection_type>
+      </camera>
+    </gui>
     <physics name="1ms" type="ignored">
       <max_step_size>0.001</max_step_size>
-      <real_time_factor>1.0</real_time_factor>
+      <real_time_factor>15.0</real_time_factor>
+      <real_time_update_rate>1000</real_time_update_rate>
     </physics>
     <plugin
       filename="gz-sim-physics-system"
@@ -40,7 +48,7 @@
       </attenuation>
       <direction>-0.5 0.1 -0.9</direction>
     </light>
-
+    
     <model name="ground_plane">
       <static>true</static>
       <link name="link">
@@ -67,10 +75,10 @@
         </visual>
       </link>
     </model>
-
+    
     <model name="obstacles">
       <static>true</static>
-
+      
       <link name="obstacle_1">
         <pose>0 0 0 0 0 0</pose>
         <collision name="collision">
@@ -88,25 +96,207 @@
           </geometry>
         </visual>
       </link>
-    </model>
-    
-    <model name="bounding_walls">
-      <static>true</static>
 
-      <!-- North Wall -->
-      <link name="north_wall">
-        <pose>0 5 1 0 0 0</pose>
+      <link name="obstacle_2">
+        <pose>4 5 0 0 0 0</pose>
         <collision name="collision">
           <geometry>
             <box>
-              <size>10 0.1 2</size>
+              <size>0.5 0.5 2</size>
             </box>
           </geometry>
         </collision>
         <visual name="visual">
           <geometry>
             <box>
-              <size>10 0.1 2</size>
+              <size>0.5 0.5 2</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+
+      <link name="obstacle_3">
+        <pose>3 -2 0 0 0 0</pose>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.5 0.5 2</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.5 0.5 2</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+    
+      <link name="obstacle_4">
+        <pose>-6 3 0 0 0 0</pose>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.5 0.5 2</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.5 0.5 2</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+
+      <link name="obstacle_5">
+        <pose>-6 -4 0 0 0 0</pose>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.5 0.5 2</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.5 0.5 2</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+
+      <link name="obstacle_6">
+        <pose>6 -6 0 0 0 0</pose>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.5 0.5 2</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.5 0.5 2</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+
+      <link name="obstacle_7">
+        <pose>5 -6 0 0 0 0</pose>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.5 0.5 2</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.5 0.5 2</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+
+      <link name="obstacle_8">
+        <pose>-3 7 0 0 0 0</pose>
+        <collision name="collision">
+          <geometry>
+            <cylinder>
+              <radius>0.5</radius>
+              <length>2.0</length>
+            </cylinder>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.5</radius>
+              <length>2.0</length>
+            </cylinder>
+          </geometry>
+        </visual>
+      </link>
+
+      <link name="obstacle_9">
+        <pose>-6 -7 0 0 0 0</pose>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>8 0.5 2</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>8 0.5 2</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+
+      <link name="obstacle_10">
+        <pose>-6 -8 0 0 0 0</pose>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.5 4 2</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.5 4 2</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+
+      <link name="obstacle_11">
+        <pose>5 7 0 0 0 0</pose>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>10 0.5 2</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>10 0.5 2</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+    <model name="bounding_walls">
+      <static>true</static>
+
+      <!-- North Wall -->
+      <link name="north_wall">
+        <pose>0 10 1 0 0 0</pose>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>20 0.1 2</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>20 0.1 2</size>
             </box>
           </geometry>
         </visual>
@@ -114,18 +304,18 @@
 
       <!-- South Wall -->
       <link name="south_wall">
-        <pose>0 -5 1 0 0 0</pose>
+        <pose>0 -10 1 0 0 0</pose>
         <collision name="collision">
           <geometry>
             <box>
-              <size>10 0.1 2</size>
+              <size>20 0.1 2</size>
             </box>
           </geometry>
         </collision>
         <visual name="visual">
           <geometry>
             <box>
-              <size>10 0.1 2</size>
+              <size>20 0.1 2</size>
             </box>
           </geometry>
         </visual>
@@ -134,18 +324,18 @@
       
       <!-- East Wall -->
       <link name="east_wall">
-        <pose>5 0 1 0 0 1.5707</pose>
+        <pose>10 0 1 0 0 1.5707</pose>
         <collision name="collision">
           <geometry>
             <box>
-              <size>10 0.1 2</size>
+              <size>20 0.1 2</size>
             </box>
           </geometry>
         </collision>
         <visual name="visual">
           <geometry>
             <box>
-              <size>10 0.1 2</size>
+              <size>20 0.1 2</size>
             </box>
           </geometry>
         </visual>
@@ -154,18 +344,18 @@
       
       <!-- West Wall -->
       <link name="west_wall">
-        <pose>-5 0 1 0 0 1.5707</pose>
+        <pose>-10 0 1 0 0 1.5707</pose>
         <collision name="collision">
           <geometry>
             <box>
-              <size>10 0.1 2</size>
+              <size>20 0.1 2</size>
             </box>
           </geometry>
         </collision>
         <visual name="visual">
           <geometry>
             <box>
-              <size>10 0.1 2</size>
+              <size>20 0.1 2</size>
             </box>
           </geometry>
         </visual>

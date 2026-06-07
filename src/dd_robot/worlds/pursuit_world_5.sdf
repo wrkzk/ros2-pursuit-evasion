@@ -1,0 +1,237 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <world name="pursuit_world">
+    <gui fullscreen="0">
+      <camera name="user_camera">
+        <pose>0 0 45 0 1.5707 1.5707</pose>
+        <view_controller>orbit</view_controller>
+        <projection_type>orthographic</projection_type>
+      </camera>
+    </gui>
+
+    <physics name="1ms" type="ignored">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>5.0</real_time_factor>
+      <real_time_update_rate>1000</real_time_update_rate>
+    </physics>
+
+    <plugin filename="gz-sim-physics-system"           name="gz::sim::systems::Physics"/>
+    <plugin filename="gz-sim-user-commands-system"     name="gz::sim::systems::UserCommands"/>
+    <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster"/>
+    <plugin filename="gz-sim-contact-system"           name="gz::sim::systems::Contact"/>
+    <plugin filename="gz-sim-sensors-system"           name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+
+    <light type="directional" name="sun">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <attenuation>
+        <range>1000</range>
+        <constant>0.9</constant>
+        <linear>0.01</linear>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
+
+    <!-- Ground plane -->
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry><plane><normal>0 0 1</normal><size>100 100</size></plane></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><plane><normal>0 0 1</normal><size>100 100</size></plane></geometry>
+          <material>
+            <ambient>0.7 0.7 0.7 1</ambient>
+            <diffuse>0.7 0.7 0.7 1</diffuse>
+            <specular>0.7 0.7 0.7 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Bounding walls: arena is 20x20, walls at x=±10, y=±10 -->
+    <model name="bounding_walls">
+      <static>true</static>
+
+      <!-- north wall: y=10, x=-10..10, length=20 -->
+      <link name="north_wall">
+        <pose>0 10 1 0 0 0</pose>
+        <collision name="collision"><geometry><box><size>20.0 0.2 2.0</size></box></geometry></collision>
+        <visual name="visual">
+          <geometry><box><size>20.0 0.2 2.0</size></box></geometry>
+          <material><ambient>0.35 0.35 0.45 1</ambient><diffuse>0.35 0.35 0.45 1</diffuse></material>
+        </visual>
+      </link>
+
+      <!-- south wall: y=-10, x=-10..10, length=20 -->
+      <link name="south_wall">
+        <pose>0 -10 1 0 0 0</pose>
+        <collision name="collision"><geometry><box><size>20.0 0.2 2.0</size></box></geometry></collision>
+        <visual name="visual">
+          <geometry><box><size>20.0 0.2 2.0</size></box></geometry>
+          <material><ambient>0.35 0.35 0.45 1</ambient><diffuse>0.35 0.35 0.45 1</diffuse></material>
+        </visual>
+      </link>
+
+      <!-- east wall: x=10, y=-10..10, length=20 -->
+      <link name="east_wall">
+        <pose>10 0 1 0 0 0</pose>
+        <collision name="collision"><geometry><box><size>0.2 20.0 2.0</size></box></geometry></collision>
+        <visual name="visual">
+          <geometry><box><size>0.2 20.0 2.0</size></box></geometry>
+          <material><ambient>0.35 0.35 0.45 1</ambient><diffuse>0.35 0.35 0.45 1</diffuse></material>
+        </visual>
+      </link>
+
+      <!-- west wall: x=-10, y=-10..10, length=20 -->
+      <link name="west_wall">
+        <pose>-10 0 1 0 0 0</pose>
+        <collision name="collision"><geometry><box><size>0.2 20.0 2.0</size></box></geometry></collision>
+        <visual name="visual">
+          <geometry><box><size>0.2 20.0 2.0</size></box></geometry>
+          <material><ambient>0.35 0.35 0.45 1</ambient><diffuse>0.35 0.35 0.45 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!--
+    MAZE WALLS — all gaps verified >= 5m
+
+    ROW A (y=5)  horizontal:
+      west seg:  x=-10 to x=-3   length=7   center=(-6.5, 5)
+      GAP:       x=-3  to x= 3   = 6m
+      east seg:  x= 3  to x=10   length=7   center=(6.5,  5)
+
+    ROW B (y=-2) horizontal:
+      west seg:  x=-10 to x=-2   length=8   center=(-6,  -2)
+      GAP:       x=-2  to x= 4   = 6m
+      east seg:  x= 4  to x=10   length=6   center=(7,   -2)
+
+    ROW C (y=-7) horizontal:
+      west seg:  x=-10 to x=-3   length=7   center=(-6.5,-7)
+      GAP:       x=-3  to x= 3   = 6m
+      east seg:  x= 3  to x=10   length=7   center=(6.5, -7)
+
+    COL A (x=-6) vertical:
+      north seg: y= 2  to y=10   length=8   center=(-6,  6)
+      GAP:       y=-3  to y= 2   = 5m
+      south seg: y=-10 to y=-3   length=7   center=(-6, -6.5)
+
+    COL B (x=5)  vertical:
+      north seg: y= 3  to y=10   length=7   center=(5,   6.5)
+      GAP:       y=-2  to y= 3   = 5m
+      south seg: y=-10 to y=-2   length=8   center=(5,  -6)
+    -->
+    <model name="maze_walls">
+      <static>true</static>
+
+      <!-- ROW A west: x=-10 to -3, length=7, center=(-6.5, 5) -->
+      <link name="rowA_west">
+        <pose>-6.5 5 1 0 0 0</pose>
+        <collision name="collision"><geometry><box><size>7.0 0.3 2.0</size></box></geometry></collision>
+        <visual name="visual">
+          <geometry><box><size>7.0 0.3 2.0</size></box></geometry>
+          <material><ambient>0.25 0.45 0.65 1</ambient><diffuse>0.25 0.45 0.65 1</diffuse></material>
+        </visual>
+      </link>
+
+      <!-- ROW A east: x=3 to 10, length=7, center=(6.5, 5) -->
+      <link name="rowA_east">
+        <pose>6.5 5 1 0 0 0</pose>
+        <collision name="collision"><geometry><box><size>7.0 0.3 2.0</size></box></geometry></collision>
+        <visual name="visual">
+          <geometry><box><size>7.0 0.3 2.0</size></box></geometry>
+          <material><ambient>0.25 0.45 0.65 1</ambient><diffuse>0.25 0.45 0.65 1</diffuse></material>
+        </visual>
+      </link>
+
+      <!-- ROW B west: x=-10 to -2, length=8, center=(-6, -2) -->
+      <link name="rowB_west">
+        <pose>-6 -2 1 0 0 0</pose>
+        <collision name="collision"><geometry><box><size>8.0 0.3 2.0</size></box></geometry></collision>
+        <visual name="visual">
+          <geometry><box><size>8.0 0.3 2.0</size></box></geometry>
+          <material><ambient>0.25 0.45 0.65 1</ambient><diffuse>0.25 0.45 0.65 1</diffuse></material>
+        </visual>
+      </link>
+
+      <!-- ROW B east: x=4 to 10, length=6, center=(7, -2) -->
+      <link name="rowB_east">
+        <pose>7 -2 1 0 0 0</pose>
+        <collision name="collision"><geometry><box><size>6.0 0.3 2.0</size></box></geometry></collision>
+        <visual name="visual">
+          <geometry><box><size>6.0 0.3 2.0</size></box></geometry>
+          <material><ambient>0.25 0.45 0.65 1</ambient><diffuse>0.25 0.45 0.65 1</diffuse></material>
+        </visual>
+      </link>
+
+      <!-- ROW C west: x=-10 to -3, length=7, center=(-6.5, -7) -->
+      <link name="rowC_west">
+        <pose>-6.5 -7 1 0 0 0</pose>
+        <collision name="collision"><geometry><box><size>7.0 0.3 2.0</size></box></geometry></collision>
+        <visual name="visual">
+          <geometry><box><size>7.0 0.3 2.0</size></box></geometry>
+          <material><ambient>0.25 0.45 0.65 1</ambient><diffuse>0.25 0.45 0.65 1</diffuse></material>
+        </visual>
+      </link>
+
+      <!-- ROW C east: x=3 to 10, length=7, center=(6.5, -7) -->
+      <link name="rowC_east">
+        <pose>6.5 -7 1 0 0 0</pose>
+        <collision name="collision"><geometry><box><size>7.0 0.3 2.0</size></box></geometry></collision>
+        <visual name="visual">
+          <geometry><box><size>7.0 0.3 2.0</size></box></geometry>
+          <material><ambient>0.25 0.45 0.65 1</ambient><diffuse>0.25 0.45 0.65 1</diffuse></material>
+        </visual>
+      </link>
+
+      <!-- COL A north: y=2 to 10, length=8, center=(-6, 6) -->
+      <link name="colA_north">
+        <pose>-6 6 1 0 0 0</pose>
+        <collision name="collision"><geometry><box><size>0.3 8.0 2.0</size></box></geometry></collision>
+        <visual name="visual">
+          <geometry><box><size>0.3 8.0 2.0</size></box></geometry>
+          <material><ambient>0.55 0.30 0.55 1</ambient><diffuse>0.55 0.30 0.55 1</diffuse></material>
+        </visual>
+      </link>
+
+      <!-- COL A south: y=-10 to -3, length=7, center=(-6, -6.5) -->
+      <link name="colA_south">
+        <pose>-6 -6.5 1 0 0 0</pose>
+        <collision name="collision"><geometry><box><size>0.3 7.0 2.0</size></box></geometry></collision>
+        <visual name="visual">
+          <geometry><box><size>0.3 7.0 2.0</size></box></geometry>
+          <material><ambient>0.55 0.30 0.55 1</ambient><diffuse>0.55 0.30 0.55 1</diffuse></material>
+        </visual>
+      </link>
+
+      <!-- COL B north: y=3 to 10, length=7, center=(5, 6.5) -->
+      <link name="colB_north">
+        <pose>5 6.5 1 0 0 0</pose>
+        <collision name="collision"><geometry><box><size>0.3 7.0 2.0</size></box></geometry></collision>
+        <visual name="visual">
+          <geometry><box><size>0.3 7.0 2.0</size></box></geometry>
+          <material><ambient>0.55 0.30 0.55 1</ambient><diffuse>0.55 0.30 0.55 1</diffuse></material>
+        </visual>
+      </link>
+
+      <!-- COL B south: y=-10 to -2, length=8, center=(5, -6) -->
+      <link name="colB_south">
+        <pose>5 -6 1 0 0 0</pose>
+        <collision name="collision"><geometry><box><size>0.3 8.0 2.0</size></box></geometry></collision>
+        <visual name="visual">
+          <geometry><box><size>0.3 8.0 2.0</size></box></geometry>
+          <material><ambient>0.55 0.30 0.55 1</ambient><diffuse>0.55 0.30 0.55 1</diffuse></material>
+        </visual>
+      </link>
+
+    </model>
+
+  </world>
+</sdf>

@@ -29,7 +29,9 @@ setup(
         'console_scripts': [
             'manager = pursuit_evasion.manager:main',
             'pursuit_controller = pursuit_evasion.pursuit_controller:main',
-            'evasion_controller = pursuit_evasion.evasion_controller:main'
+            'evasion_controller = pursuit_evasion.evasion_controller:main',
+            'sim_supervisor = pursuit_evasion.supervisor:main',
+            'pursuit_controller_voronoi = pursuit_evasion.pursuit_controller_voronoi:main'
         ],
     },
 )

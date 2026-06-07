@@ -22,10 +22,10 @@ def generate_launch_description():
 
     # Define the robots that we want to spawn in
     robots = [
-        { 'name': 'pursuer_1', 'x': '-2.5', 'y': '2.5', 'lookahead' : 2.0},
-        { 'name': 'pursuer_2', 'x': '-2.5', 'y': '-2.5', 'lookahead' : 2.0},
-        #{ 'name': 'pursuer_3', 'x': '2.5', 'y': '2.5', 'lookahead' : 5.0},
-        #{ 'name': 'pursuer_4', 'x': '2.5', 'y': '-2.5', 'lookahead' : 5.0},
+        { 'name': 'pursuer_1', 'x': '-7.0', 'y': '-7.0' },
+        { 'name': 'pursuer_2', 'x': '7.0', 'y': '7.0' },
+        { 'name': 'pursuer_3', 'x': '-7.0', 'y': '7.0' },
+        # { 'name': 'pursuer_4', 'x': '7.0', 'y': '-7.0' },
         { 'name': 'evader_1',  'x': '1.0', 'y': '0.0' }
     ]
 
@@ -40,7 +40,7 @@ def generate_launch_description():
             )
         ),
         launch_arguments = {
-            'gz_args': ['-r ', os.path.join(pkg_dd_robot, 'worlds', 'pursuit_world.sdf')],
+            'gz_args': ['-r ', os.path.join(pkg_dd_robot, 'worlds', 'pursuit_world_circle.sdf')],
             'on_exit_shutdown': 'True'
         }.items()
     )
@@ -51,13 +51,49 @@ def generate_launch_description():
         name = 'manager',
         output = 'screen',
         parameters = [{
-            'active_robots': [r['name'] for r in robots]
+            'active_robots': [r['name'] for r in robots],
+            'use_sim_time': True
         }]
     )
 
+    supervisor = Node(
+        package='pursuit_evasion',
+        executable='sim_supervisor',
+        name='sim_supervisor',
+        output='screen',
+        parameters=[{
+            "filename" : "results_3_pursuer.csv",
+            'use_sim_time': True
+        }]
+    )
+
+    clock_bridge = Node(
+        package='ros_gz_bridge',
+        executable='parameter_bridge',
+        arguments=['/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock'],
+        output='screen'
+    )
+
+    teleop = Node(
+            package='teleop_twist_keyboard',
+            executable='teleop_twist_keyboard',
+            output='screen',
+            prefix=['gnome-terminal --'],
+            parameters=[{
+                'speed': 1.0,
+                'turn': 2.0
+            }],
+            remappings=[
+                ('/cmd_vel', '/evader_1/cmd_vel')
+            ]
+        )
+
     launch_items = [
         gazebo,
-        manager
+        manager,
+        # supervisor,
+        clock_bridge,
+        teleop
     ]
     
     for robot in robots:
@@ -78,7 +114,7 @@ def generate_launch_description():
             output = 'screen',
             parameters = [{
                 'robot_description': robot_description,
-                'frame_prefix': f'{robot_name}/'
+                'frame_prefix': f'{robot_name}/',
             }]
         )
 
@@ -116,41 +152,29 @@ def generate_launch_description():
         if robot_name.split('_')[0] == 'pursuer':
             controller = Node(
                 package = 'pursuit_evasion',
-                executable = 'pursuit_controller',
+                executable = 'pursuit_controller_voronoi',
                 namespace = robot_name,
                 name = f'{robot_name}_controller',
                 output = 'screen',
                 parameters = [{
                     'robot': f'{robot_name}',
-                    'lookahead' : robot["lookahead"]
+                    'use_sim_time': True
                 }]
             )
             launch_items.append(controller)
 
-        elif robot_name == 'evader':
-            controller = Node(
-                package = 'pursuit_evasion',
-                executable = 'evasion_controller',
-                namespace = robot_name,
-                name = f'{robot_name}_controller',
-                output = 'screen',
-                parameters = [{
-                    'robot': f'{robot_name}'
-                }]
-            )
-            launch_items.append(controller)
-
-        if robot_name.split('_')[0] == 'evader':
-            controller = Node(
-                package = 'pursuit_evasion',
-                executable = 'evasion_controller',
-                namespace = robot_name,
-                name = f'{robot_name}_controller',
-                parameters = [{
-                    'robot': f'{robot_name}'
-                }]
-            )
-            launch_items.append(controller)
+        # if robot_name.split('_')[0] == 'evader':
+        #     controller = Node(
+        #         package = 'pursuit_evasion',
+        #         executable = 'evasion_controller',
+        #         namespace = robot_name,
+        #         name = f'{robot_name}_controller',
+        #         parameters = [{
+        #             'robot': f'{robot_name}',
+        #             'use_sim_time': True
+        #         }]
+        #     )
+        #     launch_items.append(controller) 
 
 
         launch_items.append(robot_state_publisher)
