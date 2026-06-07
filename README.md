@@ -6,4 +6,9 @@
 - Gazebo Harmonic
 
 ## How to Run
-`colcon build`
+First, ensure the dependencies are met. Then execute:
+`
+colcon build
+source install/setup.bash
+ros2 launch pursuit_evasion pursuit_evasion.launch.py pursuit_strategy:={pure|voronoi}
+`
