@@ -9,6 +9,8 @@ This repository contains all code and analysis files for Warren, Christian, and 
 ## How to Run
 First, ensure the dependencies are met. Then execute:
 ```
+git clone https://github.com/wrkzk/ros2-pursuit-evasion
+cd ros2-pursuit-evasion
 colcon build
 source install/setup.bash
 ros2 launch pursuit_evasion pursuit_evasion.launch.py pursuit_strategy:={pure|voronoi}
